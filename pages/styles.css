@@ -1,0 +1,355 @@
+/* PopKornMachine Brand Color Palette */
+:root {
+  --primary: #0073E6;    /* Primary blue - buttons, highlights, links */
+  --secondary: #001F3F;  /* Navy/dark blue - headers, text accents, footer bg */
+  --white: #FFFFFF;      /* White - background and sections */
+  --light-gray: #F5F5F5; /* Light gray - background strips, separators */
+  --dark-gray: #333333;  /* Dark gray - body text */
+  --accent-red: #CC3333; /* Alert/emphasis red - occasional highlights or icons */
+  --transparent: transparent;
+  --overlay: rgba(0, 0, 0, 0.5);
+}
+
+/* Background Colors */
+.bg-primary { background-color: var(--primary); }
+.bg-secondary { background-color: var(--secondary); }
+.bg-white { background-color: var(--white); }
+.bg-light-gray { background-color: var(--light-gray); }
+.bg-dark-gray { background-color: var(--dark-gray); }
+.bg-accent-red { background-color: var(--accent-red); }
+.bg-transparent { background-color: var(--transparent); }
+.bg-overlay { background-color: var(--overlay); }
+
+/* Text Colors */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-white { color: var(--white); }
+.text-light-gray { color: var(--light-gray); }
+.text-dark-gray { color: var(--dark-gray); }
+.text-accent-red { color: var(--accent-red); }
+
+/* Border Colors */
+.border-primary { border-color: var(--primary); }
+.border-secondary { border-color: var(--secondary); }
+.border-white { border-color: var(--white); }
+.border-light-gray { border-color: var(--light-gray); }
+.border-dark-gray { border-color: var(--dark-gray); }
+.border-accent-red { border-color: var(--accent-red); }
+
+/* Hover States */
+.hover\:bg-primary:hover { background-color: var(--primary); }
+.hover\:bg-secondary:hover { background-color: var(--secondary); }
+.hover\:bg-accent-red:hover { background-color: var(--accent-red); }
+.hover\:text-primary:hover { color: var(--primary); }
+.hover\:text-secondary:hover { color: var(--secondary); }
+.hover\:text-accent-red:hover { color: var(--accent-red); }
+
+/* Focus States */
+.focus\:ring-primary:focus { --tw-ring-color: var(--primary); }
+.focus\:ring-secondary:focus { --tw-ring-color: var(--secondary); }
+.focus\:ring-accent-red:focus { --tw-ring-color: var(--accent-red); }
+
+/* Gradients */
+.bg-gradient-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+.bg-gradient-secondary { background: linear-gradient(135deg, var(--secondary), var(--primary)); }
+.bg-gradient-red { background: linear-gradient(135deg, var(--accent-red), var(--secondary)); }
+
+/* Custom Background Classes */
+.bg-fixed {
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
+  overflow: auto;
+  background-color: var(--white);
+}
+
+/* Override existing Tailwind colors to match brand palette */
+.bg-gray-50 { background-color: var(--light-gray); }
+.bg-gray-100 { background-color: #F0F0F0; }
+.bg-gray-200 { background-color: #E0E0E0; }
+.bg-gray-300 { background-color: #D0D0D0; }
+.bg-gray-400 { background-color: #C0C0C0; }
+.bg-gray-500 { background-color: #A0A0A0; }
+.bg-gray-600 { background-color: var(--dark-gray); }
+.bg-gray-700 { background-color: #555555; }
+.bg-gray-800 { background-color: var(--secondary); }
+.bg-gray-900 { background-color: #0A0A0A; }
+
+.text-gray-50 { color: var(--light-gray); }
+.text-gray-100 { color: #F0F0F0; }
+.text-gray-200 { color: #E0E0E0; }
+.text-gray-300 { color: #D0D0D0; }
+.text-gray-400 { color: #C0C0C0; }
+.text-gray-500 { color: #A0A0A0; }
+.text-gray-600 { color: var(--dark-gray); }
+.text-gray-700 { color: #555555; }
+.text-gray-800 { color: var(--secondary); }
+.text-gray-900 { color: #0A0A0A; }
+
+/* Blue tones - override to match primary */
+.bg-blue-50 { background-color: #F0F8FF; }
+.bg-blue-100 { background-color: #E0F0FF; }
+.bg-blue-200 { background-color: #C0E0FF; }
+.bg-blue-300 { background-color: #A0D0FF; }
+.bg-blue-400 { background-color: #80C0FF; }
+.bg-blue-500 { background-color: #60B0FF; }
+.bg-blue-600 { background-color: var(--primary); }
+.bg-blue-700 { background-color: #0060CC; }
+.bg-blue-800 { background-color: var(--secondary); }
+.bg-blue-900 { background-color: #001A33; }
+
+.text-blue-50 { color: #F0F8FF; }
+.text-blue-100 { color: #E0F0FF; }
+.text-blue-200 { color: #C0E0FF; }
+.text-blue-300 { color: #A0D0FF; }
+.text-blue-400 { color: #80C0FF; }
+.text-blue-500 { color: #60B0FF; }
+.text-blue-600 { color: var(--primary); }
+.text-blue-700 { color: #0060CC; }
+.text-blue-800 { background-color: var(--secondary); }
+.text-blue-900 { color: #001A33; }
+
+/* Green tones - keep some green accents */
+.bg-green-50 { background-color: #F0FFF0; }
+.bg-green-100 { background-color: #E0FFE0; }
+.bg-green-200 { background-color: #C0FFC0; }
+.bg-green-300 { background-color: #A0FFA0; }
+.bg-green-400 { background-color: #80FF80; }
+.bg-green-500 { background-color: #60FF60; }
+.bg-green-600 { background-color: #40CC40; }
+.bg-green-700 { background-color: #339933; }
+.bg-green-800 { background-color: #267326; }
+.bg-green-900 { background-color: #1A4D1A; }
+
+.text-green-50 { color: #F0FFF0; }
+.text-green-100 { color: #E0FFE0; }
+.text-green-200 { color: #C0FFC0; }
+.text-green-300 { color: #A0FFA0; }
+.text-green-400 { color: #80FF80; }
+.text-green-500 { color: #60FF60; }
+.text-green-600 { color: #40CC40; }
+.text-green-700 { color: #339933; }
+.text-green-800 { color: #267326; }
+.text-green-900 { color: #1A4D1A; }
+
+/* Red tones - override to match accent red */
+.bg-red-50 { background-color: #FFF0F0; }
+.bg-red-100 { background-color: #FFE0E0; }
+.bg-red-200 { background-color: #FFC0C0; }
+.bg-red-300 { background-color: #FFA0A0; }
+.bg-red-400 { background-color: #FF8080; }
+.bg-red-500 { background-color: #FF6060; }
+.bg-red-600 { background-color: var(--accent-red); }
+.bg-red-700 { background-color: #AA2222; }
+.bg-red-800 { background-color: #881111; }
+.bg-red-900 { background-color: #660000; }
+
+.text-red-50 { color: #FFF0F0; }
+.text-red-100 { color: #FFE0E0; }
+.text-red-200 { color: #FFC0C0; }
+.text-red-300 { color: #FFA0A0; }
+.text-red-400 { color: #FF8080; }
+.text-red-500 { color: #FF6060; }
+.text-red-600 { color: var(--accent-red); }
+.text-red-700 { color: #AA2222; }
+.text-red-800 { color: #881111; }
+.text-red-900 { color: #660000; }
+
+/* Yellow tones - keep for occasional highlights */
+.bg-yellow-50 { background-color: #FFFFF0; }
+.bg-yellow-100 { background-color: #FFFFE0; }
+.bg-yellow-200 { background-color: #FFFFC0; }
+.bg-yellow-300 { background-color: #FFFFA0; }
+.bg-yellow-400 { background-color: #FFFF80; }
+.bg-yellow-500 { background-color: #FFFF60; }
+.bg-yellow-600 { background-color: #CCCC40; }
+.bg-yellow-700 { background-color: #999933; }
+.bg-yellow-800 { background-color: #666626; }
+.bg-yellow-900 { color: #33331A; }
+
+.text-yellow-50 { color: #FFFFF0; }
+.text-yellow-100 { color: #FFFFE0; }
+.text-yellow-200 { color: #FFFFC0; }
+.text-yellow-300 { color: #FFFFA0; }
+.text-yellow-400 { color: #FFFF80; }
+.text-yellow-500 { color: #FFFF60; }
+.text-yellow-600 { color: #CCCC40; }
+.text-yellow-700 { color: #999933; }
+.text-yellow-800 { color: #666626; }
+.text-yellow-900 { color: #33331A; }
+
+/* Purple tones - keep for occasional accents */
+.bg-purple-50 { background-color: #FFF0FF; }
+.bg-purple-100 { color: #FFE0FF; }
+.bg-purple-200 { background-color: #FFC0FF; }
+.bg-purple-300 { background-color: #FFA0FF; }
+.bg-purple-400 { background-color: #FF80FF; }
+.bg-purple-500 { background-color: #FF60FF; }
+.bg-purple-600 { background-color: #CC40CC; }
+.bg-purple-700 { background-color: #993399; }
+.bg-purple-800 { background-color: #662666; }
+.bg-purple-900 { background-color: #331A33; }
+
+.text-purple-50 { color: #FFF0FF; }
+.text-purple-100 { color: #FFE0FF; }
+.text-purple-200 { color: #FFC0FF; }
+.text-purple-300 { color: #FFA0FF; }
+.text-purple-400 { background-color: #FF80FF; }
+.text-purple-500 { background-color: #FF60FF; }
+.text-purple-600 { background-color: #CC40CC; }
+.text-purple-700 { background-color: #993399; }
+.text-purple-800 { background-color: #662666; }
+.text-purple-900 { background-color: #331A33; }
+
+/* Responsive Design Improvements */
+
+/* Debug - make sure CSS is loading */
+body {
+  border: 1px solid transparent; /* Invisible border to test if CSS loads */
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 640px) {
+  /* Hero section adjustments */
+  .hero-gradient h1 {
+    font-size: 2.5rem !important; /* text-4xl on mobile */
+    line-height: 1.2 !important;
+  }
+
+  /* Navigation adjustments */
+  nav .flex.items-center.space-x-4 {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  nav .flex.items-center.space-x-4 > div {
+    order: -1 !important; /* Logo and title first on mobile */
+  }
+
+  /* Button stacking */
+  .flex.flex-col.sm\\:flex-row {
+    flex-direction: column !important;
+  }
+
+  /* Feature cards */
+  .feature-card {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Grid adjustments for very small screens */
+  .grid.md\\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grid.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Progress steps on workflow page */
+  .flex.items-center.justify-center.space-x-4 {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .flex.justify-center.mt-4.space-x-8 {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    text-align: center !important;
+  }
+
+  /* Content grid in approval phase */
+  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Workflow page specific responsive adjustments */
+  .container.mx-auto.px-4.py-8.max-w-6xl {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Form inputs and buttons on mobile */
+  .bg-white.rounded-lg.shadow-lg.p-6.mb-8 {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Make buttons more touch-friendly */
+  button, .px-6.py-3, .px-8.py-3 {
+    min-height: 44px !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Medium screen adjustments */
+  .hero-gradient h1 {
+    font-size: 3.5rem !important; /* text-5xl on tablet */
+  }
+
+  /* Grid layouts */
+  .grid.md\\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid.lg\\:grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on tablet instead of 3 */
+  }
+}
+
+/* Large screen enhancements */
+@media (min-width: 1025px) {
+  /* Ensure proper spacing on large screens */
+  .max-w-7xl, .max-w-6xl {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Touch-friendly improvements for mobile */
+@media (max-width: 768px) {
+  /* Increase touch targets */
+  button, .btn, a[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better spacing for touch */
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .py-2 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* High-resolution displays */
+@media (min-width: 1440px) {
+  /* Slightly larger text on very large screens */
+  body {
+    font-size: 1.0625rem; /* 17px */
+  }
+}
+
+/* Print styles - hide interactive elements */
+@media print {
+  nav, .btn, button, .hover\\:bg-primary, .hover\\:text-primary {
+    display: none !important;
+  }
+
+  .bg-gray-900 {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .text-white {
+    color: black !important;
+  }
+}

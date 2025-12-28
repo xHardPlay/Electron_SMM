@@ -1,0 +1,45 @@
+<div id="phase5" class="bg-white rounded-lg shadow-lg p-6 mb-8 hidden">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Phase 5: Content Approval & Export</h2>
+
+    <div id="approvalContent">
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Assembling Your Content...</h3>
+            <p class="text-gray-600">Combining posts, images, and branding into ready-to-post content</p>
+        </div>
+    </div>
+
+    <div id="approvalInterface" class="hidden">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Content Review & Approval</h3>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p class="text-yellow-800">
+                    <strong>Review your content:</strong> <span id="totalPostsCount">0</span> posts with images have been generated.
+                    You can approve all, reject individual posts for regeneration, or export the approved content.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex space-x-4">
+                <button onclick="approveAll()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    ✅ Approve All
+                </button>
+                <button onclick="rejectAll()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    ❌ Reject All
+                </button>
+            </div>
+            <div class="text-sm text-gray-600">
+                <span id="approvedCount">0</span> / <span id="totalPostsCount">100</span> posts approved
+            </div>
+        </div>
+
+        <div id="contentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto"></div>
+
+        <div class="mt-6 flex justify-end space-x-4">
+            <button onclick="exportApproved()" id="exportBtn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                📤 Export Approved Content
+            </button>
+        </div>
+    </div>
+</div>

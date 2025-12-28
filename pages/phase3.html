@@ -1,0 +1,87 @@
+<div id="phase3" class="bg-white rounded-lg shadow-lg p-6 mb-8 hidden">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Phase 3: Bulk Content Generation (100 Posts)</h2>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Content Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Content Categories</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="content-category mr-2" value="educational"> Educational Content
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="content-category mr-2" value="promotional"> Promotional Content
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="content-category mr-2" value="engagement"> Engagement Posts
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="content-category mr-2" value="industry"> Industry Insights
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Target Platforms</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="platform mr-2" value="instagram" checked> Instagram
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="platform mr-2" value="facebook"> Facebook
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="platform mr-2" value="linkedin"> LinkedIn
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="platform mr-2" value="twitter"> Twitter
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Generation Settings</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Posts</label>
+                    <select id="postCount" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="5" selected>5 posts (test mode)</option>
+                        <option value="25">25 posts</option>
+                        <option value="50">50 posts</option>
+                        <option value="100">100 posts</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Content Goals</label>
+                    <select id="contentGoal" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="awareness">Brand Awareness</option>
+                        <option value="engagement">Community Engagement</option>
+                        <option value="conversion">Lead Generation</option>
+                        <option value="mixed" selected>Mixed Goals</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+        <button onclick="generateBulkContent()" id="bulkContentBtn" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Generate Content Posts
+        </button>
+    </div>
+
+    <div id="contentResults" class="mt-6 hidden">
+        <h3 class="text-lg font-semibold mb-4">Generated Content Preview</h3>
+        <div id="contentPreview" class="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto"></div>
+        <div class="mt-4 flex justify-end">
+            <button onclick="proceedToPhase4()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Continue to Visual Assets
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,564 @@
+{
+  "name": "Clear Future Consulting Services AI Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Entry Data",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Source",
+              "fieldType": "textarea",
+              "placeholder": "https://clearfuturecs.com/",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -2592,
+        -496
+      ],
+      "id": "76030b4a-53ca-4e9f-bf01-c142184c0370",
+      "name": "On form submission",
+      "webhookId": "797f8c96-0857-4629-92a1-beaca4365fd8"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "40351e46-f421-4a4f-a630-737635ae8a0e",
+              "name": "Source",
+              "value": "={{ $json.Source }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2288,
+        -560
+      ],
+      "id": "5e7c7993-6559-4b9a-ac5e-d9406401e7e5",
+      "name": "User Input"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        528
+      ],
+      "id": "f5228396-d291-49aa-8d9a-8fe984d50e29",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "wX8448No1rghRifT",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"overview\": {\n    \"owner_type\": \"\",\n    \"industry\": \"\",\n    \"business_model\": \"\",\n    \"primary_product_or_service\": \"\",\n    \"target_audience\": \"\",\n    \"customer_pain_points\": [],\n    \"unique_value_proposition\": \"\",\n    \"primary_goal\": \"\"\n  },\n  \"product_analysis\": {\n    \"offer_clarity\": \"\",\n    \"pricing_visibility\": \"\",\n    \"key_features_or_benefits\": [],\n    \"differentiation_level\": \"\",\n    \"objections_not_addressed\": []\n  },\n  \"sites\": [\n    {\n      \"url\": \"\",\n      \"purpose\": \"\",\n      \"user_intent\": \"\",\n      \"strengths\": [],\n      \"weaknesses\": [],\n      \"ux_issues\": [],\n      \"seo_issues\": [],\n      \"content_issues\": [],\n      \"technical_issues\": [],\n      \"conversion_issues\": [],\n      \"trust_issues\": []\n    }\n  ],\n  \"customer_journey\": {\n    \"top_of_funnel_gaps\": [],\n    \"middle_of_funnel_gaps\": [],\n    \"bottom_of_funnel_gaps\": [],\n    \"leak_points\": []\n  },\n  \"cross_site_analysis\": {\n    \"consistency_issues\": [],\n    \"missed_synergies\": [],\n    \"branding_gaps\": [],\n    \"cross_promotion_opportunities\": []\n  },\n  \"swot\": {\n    \"strengths\": [],\n    \"weaknesses\": [],\n    \"opportunities\": [],\n    \"threats\": []\n  },\n  \"growth_opportunities\": {\n    \"seo\": [],\n    \"conversion_rate_optimization\": [],\n    \"content\": [],\n    \"paid_or_partnerships\": []\n  },\n  \"quick_wins\": [],\n  \"strategic_recommendations\": [],\n  \"priority_actions\": [\n    {\n      \"action\": \"\",\n      \"impact\": \"\",\n      \"effort\": \"\"\n    }\n  ]\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1136,
+        -96
+      ],
+      "id": "abd5346d-f293-4a0a-bb94-7980424f9ff6",
+      "name": "Response Format"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert Web Analyst, Product Strategist, SEO Specialist, CRO Consultant and Digital Growth Advisor.\n\nYour task is to analyze one or multiple websites that belong to the SAME OWNER.\nInput will be an array of URLs (commonly 3–5, but may be 1 or many).\n\nYour goal is to extract BUSINESS-CRITICAL insights that help the website owner\nimprove sales, positioning, trust, and growth.\n\nYou must:\n- Scrape and analyze publicly available content from each URL\n- Understand the PRODUCT or SERVICE being sold (what, how, for whom, why)\n- Identify the value proposition, pricing signals, and monetization approach\n- Infer the customer journey and buying intent level\n- Detect strengths, weaknesses, risks, and growth opportunities\n- Analyze UX, SEO, performance, content, branding, trust, and conversion\n- Compare and correlate insights across sites when multiple URLs exist\n- Provide actionable, owner-oriented insights\n\nStrict Rules:\n- Do NOT hallucinate data you cannot reasonably infer from the website\n- If information is missing or unclear, explicitly state it as a gap\n- Be concise, professional, and business-oriented\n- Respond ONLY in valid JSON following the schema below\n- Do NOT include explanations, comments, markdown, or extra text\n\nInput:\n{\n {{ $('User Input').item.json.Source }}\n}\n\nOutput JSON Schema (FIXED):\n\n{\n  \"overview\": {\n    \"owner_type\": \"string\",\n    \"industry\": \"string\",\n    \"business_model\": \"string\",\n    \"primary_product_or_service\": \"string\",\n    \"target_audience\": \"string\",\n    \"customer_pain_points\": [\"string\"],\n    \"unique_value_proposition\": \"string\",\n    \"primary_goal\": \"string\"\n  },\n  \"product_analysis\": {\n    \"offer_clarity\": \"clear | partial | unclear\",\n    \"pricing_visibility\": \"visible | implied | missing\",\n    \"key_features_or_benefits\": [\"string\"],\n    \"differentiation_level\": \"high | medium | low\",\n    \"objections_not_addressed\": [\"string\"]\n  },\n  \"sites\": [\n    {\n      \"url\": \"string\",\n      \"purpose\": \"string\",\n      \"user_intent\": \"informational | transactional | mixed\",\n      \"strengths\": [\"string\"],\n      \"weaknesses\": [\"string\"],\n      \"ux_issues\": [\"string\"],\n      \"seo_issues\": [\"string\"],\n      \"content_issues\": [\"string\"],\n      \"technical_issues\": [\"string\"],\n      \"conversion_issues\": [\"string\"],\n      \"trust_issues\": [\"string\"]\n    }\n  ],\n  \"customer_journey\": {\n    \"top_of_funnel_gaps\": [\"string\"],\n    \"middle_of_funnel_gaps\": [\"string\"],\n    \"bottom_of_funnel_gaps\": [\"string\"],\n    \"leak_points\": [\"string\"]\n  },\n  \"cross_site_analysis\": {\n    \"consistency_issues\": [\"string\"],\n    \"missed_synergies\": [\"string\"],\n    \"branding_gaps\": [\"string\"],\n    \"cross_promotion_opportunities\": [\"string\"]\n  },\n  \"swot\": {\n    \"strengths\": [\"string\"],\n    \"weaknesses\": [\"string\"],\n    \"opportunities\": [\"string\"],\n    \"threats\": [\"string\"]\n  },\n  \"growth_opportunities\": {\n    \"seo\": [\"string\"],\n    \"conversion_rate_optimization\": [\"string\"],\n    \"content\": [\"string\"],\n    \"paid_or_partnerships\": [\"string\"]\n  },\n  \"quick_wins\": [\"string\"],\n  \"strategic_recommendations\": [\"string\"],\n  \"priority_actions\": [\n    {\n      \"action\": \"string\",\n      \"impact\": \"high | medium | low\",\n      \"effort\": \"high | medium | low\"\n    }\n  ]\n}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -1392,
+        -400
+      ],
+      "id": "cfc2d9dd-a0d2-4c54-9ef6-6307e3f93d1c",
+      "name": "Scrap Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Resume this site : {{ $json.Source }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -2144,
+        -592
+      ],
+      "id": "b673f527-a776-4f72-aa8d-0fd5cdff7192",
+      "name": "Resume Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"resume\": \"resume of the site\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -1936,
+        -384
+      ],
+      "id": "0c61dd8f-8a7d-4b7b-9002-a236746faa0e",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### Using the information provided, create a Brand Voice for this Brand.\n\n{{ JSON.stringify($('Resume').item.json.output.resume, null, 2) }}\n\n{{ JSON.stringify($('Scrap Details').item.json.output, null, 2) }}\n\nYour response must be final and must have full information, no fillers, no gaps, no [put your link here] because no human will verify this, so allways use complete information",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -608,
+        -384
+      ],
+      "id": "9b1aa4a4-2406-4c69-9435-3ede7ef00747",
+      "name": "Brand Voice Agent1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"brand_voice_analysis\": {\n    \"brand_name\": \"string\",\n    \"industry\": \"string\",\n    \"market\": \"string\",\n    \"current_brand_voice\": {\n      \"tone\": [\"string\"],\n      \"language\": \"string\",\n      \"personality_traits\": [\"string\"],\n      \"key_messages\": [\"string\"],\n      \"voice_pillars\": [\"string\"],\n      \"communication_channels\": [\"string\"],\n      \"visual_identity_notes\": [\"string\"]\n    },\n    \"strengths\": [\"string\"],\n    \"weaknesses\": [\"string\"],\n    \"inconsistencies\": [\"string\"],\n    \"clarity_level\": \"high | medium | low\"\n  },\n  \"suggested_brand_voice\": {\n    \"objective\": \"string\",\n    \"recommended_tone\": [\"string\"],\n    \"recommended_personality_traits\": [\"string\"],\n    \"improved_key_messages\": [\"string\"],\n    \"voice_guidelines\": {\n      \"dos\": [\"string\"],\n      \"donts\": [\"string\"]\n    },\n    \"sample_copy\": {\n      \"headline\": \"string\",\n      \"short_paragraph\": \"string\",\n      \"call_to_action\": \"string\"\n    },\n    \"positioning_shift\": \"string\"\n  }\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        -176
+      ],
+      "id": "5732cba6-8b1b-497c-9f29-d75b59ccaa0f",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1648,
+        -416
+      ],
+      "id": "6e66152e-6f77-408d-add9-a9cb2a7b89e9",
+      "name": "RL",
+      "webhookId": "7a35d7bf-53dc-4014-9d52-33177e8f1701"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -864,
+        -384
+      ],
+      "id": "cef98619-ebd5-44e8-8e9b-6ea86edc2407",
+      "name": "RL1",
+      "webhookId": "ae95ab30-24aa-4a12-99c1-2a52688015e8"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ccc7cd67-c596-40fd-a88e-ebb9befbe53a",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        -688
+      ],
+      "id": "dc83093f-e4a0-4035-b4ab-1f3869613b92",
+      "name": "Brand Voice"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ecb0da6-a300-4193-bc41-1eb6ee30dbd5",
+              "name": "output.resume",
+              "value": "={{ $json.output.resume }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1696,
+        -688
+      ],
+      "id": "cf6c07cd-50b1-4adc-8f92-70b46896dc9f",
+      "name": "Resume"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de8d9986-14fb-4048-81a2-287246c39528",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1088,
+        -688
+      ],
+      "id": "1a2d5116-807d-4e15-a8fd-9869daa30c60",
+      "name": "Scrap Details"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        208,
+        -560
+      ],
+      "id": "90219c0c-4341-4ff6-8982-6bdac0edd53b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a003bf44-c2c2-4748-a292-1480e6dd83b6",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -560
+      ],
+      "id": "b213855d-ea7a-45a8-a6be-9ab236cfc923",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "={{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        -560
+      ],
+      "id": "ab592639-a62f-41f3-9fad-9012e027ef33",
+      "name": "Form",
+      "webhookId": "aaf645ff-06e3-4db6-add8-2cac1da7fe97"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Website Analysis</title>\n  <style>\n    body {\n      font-family: Arial, Helvetica, sans-serif;\n      background: #f7f9fc;\n      color: #1f2937;\n      margin: 0;\n      padding: 24px;\n    }\n    .container {\n      max-width: 960px;\n      margin: auto;\n      background: #ffffff;\n      padding: 24px;\n      border-radius: 8px;\n      box-shadow: 0 8px 24px rgba(0,0,0,0.06);\n    }\n    h1 {\n      font-size: 26px;\n      margin-top: 0;\n      border-bottom: 2px solid #e5e7eb;\n      padding-bottom: 10px;\n    }\n    h2 {\n      font-size: 20px;\n      margin-top: 28px;\n      border-bottom: 1px solid #e5e7eb;\n      padding-bottom: 6px;\n    }\n    h3 {\n      font-size: 16px;\n      margin-top: 18px;\n    }\n    p {\n      line-height: 1.6;\n    }\n    ul {\n      padding-left: 20px;\n    }\n    li {\n      margin-bottom: 6px;\n    }\n    .grid {\n      display: grid;\n      grid-template-columns: repeat(2, 1fr);\n      gap: 12px 24px;\n    }\n    .label {\n      font-weight: bold;\n      color: #374151;\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"container\">\n\n    <!-- SUMMARY -->\n    <h1>Website Summary</h1>\n    <p>{{$items()[0].json.output.resume}}</p>\n\n    <!-- OVERVIEW -->\n    <h2>Overview</h2>\n    <div class=\"grid\">\n      <div><span class=\"label\">Owner Type:</span> {{$items()[1].json.output.overview.owner_type}}</div>\n      <div><span class=\"label\">Industry:</span> {{$items()[1].json.output.overview.industry}}</div>\n      <div><span class=\"label\">Business Model:</span> {{$items()[1].json.output.overview.business_model}}</div>\n      <div><span class=\"label\">Primary Service:</span> {{$items()[1].json.output.overview.primary_product_or_service}}</div>\n      <div><span class=\"label\">Target Audience:</span> {{$items()[1].json.output.overview.target_audience}}</div>\n      <div><span class=\"label\">Primary Goal:</span> {{$items()[1].json.output.overview.primary_goal}}</div>\n    </div>\n\n    <h3>Customer Pain Points</h3>\n    <ul>\n      <li>{{$items()[1].json.output.overview.customer_pain_points[0]}}</li>\n      <li>{{$items()[1].json.output.overview.customer_pain_points[1]}}</li>\n    </ul>\n\n    <p>\n      <strong>Unique Value Proposition:</strong><br />\n      {{$items()[1].json.output.overview.unique_value_proposition}}\n    </p>\n\n    <!-- PRODUCT ANALYSIS -->\n    <h2>Product Analysis</h2>\n    <div class=\"grid\">\n      <div><span class=\"label\">Offer Clarity:</span> {{$items()[1].json.output.product_analysis.offer_clarity}}</div>\n      <div><span class=\"label\">Pricing Visibility:</span> {{$items()[1].json.output.product_analysis.pricing_visibility}}</div>\n      <div><span class=\"label\">Differentiation Level:</span> {{$items()[1].json.output.product_analysis.differentiation_level}}</div>\n    </div>\n\n    <h3>Key Features / Benefits</h3>\n    <ul>\n      <li>{{$items()[1].json.output.product_analysis.key_features_or_benefits[0]}}</li>\n      <li>{{$items()[1].json.output.product_analysis.key_features_or_benefits[1]}}</li>\n    </ul>\n\n    <h3>Objections Not Addressed</h3>\n    <ul>\n      <li>{{$items()[1].json.output.product_analysis.objections_not_addressed[0]}}</li>\n    </ul>\n\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -576
+      ],
+      "id": "f4a77e0d-d3b5-4ec2-8755-e6f589d248fe",
+      "name": "HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "User Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Input": {
+      "main": [
+        [
+          {
+            "node": "Resume Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Response Format",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Scrap Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Resume Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Brand Voice Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Format": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Scrap Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Resume Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrap Agent": {
+      "main": [
+        [
+          {
+            "node": "Scrap Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Agent": {
+      "main": [
+        [
+          {
+            "node": "Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Voice Agent1": {
+      "main": [
+        [
+          {
+            "node": "Brand Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Brand Voice Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RL": {
+      "main": [
+        [
+          {
+            "node": "Scrap Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RL1": {
+      "main": [
+        [
+          {
+            "node": "Brand Voice Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Voice": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Resume": {
+      "main": [
+        [
+          {
+            "node": "RL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrap Details": {
+      "main": [
+        [
+          {
+            "node": "RL1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "ddd5a864-25a1-4632-ba5a-4432cf71df1e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fea95b1e7fe66bc6246177426f3818db9165eb32c91897c9a950fa92951f6f99"
+  },
+  "id": "AvZOjZI1muULr240",
+  "tags": []
+}

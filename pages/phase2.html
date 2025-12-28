@@ -1,0 +1,21 @@
+<div id="phase2" class="bg-white rounded-lg shadow-lg p-6 mb-8 hidden">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Phase 2: Brand Voice Generation</h2>
+
+    <div id="voiceGenerationContent"></div>
+
+    <div class="mt-6">
+        <button onclick="generateBrandVoice()" id="voiceBtn" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Generate Brand Voice
+        </button>
+    </div>
+
+    <div id="voiceResults" class="mt-6 hidden">
+        <h3 class="text-lg font-semibold mb-4">Generated Brand Voice</h3>
+        <div id="voiceDisplay" class="bg-gray-50 p-4 rounded-lg"></div>
+        <div class="mt-4 flex justify-end">
+            <button onclick="proceedToPhase3()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Continue to Bulk Content Generation
+            </button>
+        </div>
+    </div>
+</div>

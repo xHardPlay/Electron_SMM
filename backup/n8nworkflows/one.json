@@ -1,0 +1,801 @@
+{
+  "name": "ADMaker1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "create-campaing",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -592,
+        -304
+      ],
+      "id": "65912173-9d1f-466f-ba73-7b2704bc391c",
+      "name": "Webhook",
+      "webhookId": "602dca69-5e62-4233-ab8d-5124efcc36f6"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        240
+      ],
+      "id": "a3eff6d2-e842-42aa-8a1e-0080b1cc03c3",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "wX8448No1rghRifT",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2673504-99cd-4f2f-83a1-f33f989ea4bd",
+              "name": "body.brand",
+              "value": "={{ $json.body.brand }}",
+              "type": "string"
+            },
+            {
+              "id": "c1997052-11fc-4a06-91fa-df9b498f68b0",
+              "name": "body.product",
+              "value": "={{ $json.body.product }}",
+              "type": "string"
+            },
+            {
+              "id": "678d4b29-98b4-442f-986b-7b7d7d7d993c",
+              "name": "body.platforms",
+              "value": "={{ $json.body.platforms }}",
+              "type": "array"
+            },
+            {
+              "id": "26c3b1af-a069-43b6-9c55-cb992dc6c06c",
+              "name": "body.tone",
+              "value": "={{ $json.body.tone }}",
+              "type": "string"
+            },
+            {
+              "id": "db40d0f1-2960-4043-8a13-51ac2d43338f",
+              "name": "body.goal",
+              "value": "={{ $json.body.goal }}",
+              "type": "string"
+            },
+            {
+              "id": "4ed4ffc6-687c-48d9-8589-f04630b2d710",
+              "name": "body.visual_style",
+              "value": "={{ $json.body.visual_style }}",
+              "type": "string"
+            },
+            {
+              "id": "7e284b76-fe6e-43f6-98ed-f78f233703ee",
+              "name": "body.cta",
+              "value": "={{ $json.body.cta }}",
+              "type": "string"
+            },
+            {
+              "id": "56c8880c-52cc-4ae2-a6f5-bb39f000deb5",
+              "name": "body.description",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            },
+            {
+              "id": "98c44a18-7ebc-4c2f-875f-03a535d9b92b",
+              "name": "body.sources",
+              "value": "={{ $json.body.sources }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -320,
+        -256
+      ],
+      "id": "35f72896-69d3-41dd-bc0c-b44f4071d1bc",
+      "name": "Datos de Entrada"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1099303d-495c-4c68-9fc3-1384454f4073",
+              "name": "PromptInicial",
+              "value": "=You are a Brand Voice for : \"{{ $('Datos de Entrada').item.json.body.brand }}\".\nCreate an add for the product : \"{{ $('Datos de Entrada').item.json.body.product }}\"\".\n\nand seek for this goal  : \"{{ $('Datos de Entrada').item.json.body.goal }}\".\nwith a call to action to : \"{{ $('Datos de Entrada').item.json.body.cta }}\".\nusing this brandvoice : \"{{ $json.BrandVoice }}\"\n\nThe result must be FINAL and COMPLETE , dont use missing information or templates for edits, must be FINAL FORMAT\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        288
+      ],
+      "id": "be72b095-4386-43ba-89a7-62b565ae9806",
+      "name": "Prompt Inicial"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"posts\": \"full post , allways in english\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2160,
+        240
+      ],
+      "id": "a9119e15-3cf6-48ba-b80d-8b3a056c2079",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28d0911d-4193-42f7-8678-9f2939e61e00",
+              "name": "AI_Prompt",
+              "value": "=You are an expert graphic designer specialized in creating high-impact advertising visuals.\nWith over 5 years of experience as a prompt engineer and multimedia designer, you excel at generating hyper-realistic images using AI.\n\nYour mission is to create a professional, ultra-photorealistic image prompt in English designed for an Instagram format advertisement that immediately captures audience attention.\n\nThe image must be based on the following advertisement concept:\n\n\"{{ $json.output.post }}\"\n\nCRITICAL VISUAL REQUIREMENT (MANDATORY):\nThe image MUST clearly and naturally include the brand name and a short marketing phrase as REAL, PHYSICAL TEXT inside the scene.\nThe text must appear as part of the real environment, for example:\n- printed on a poster, sign, banner, or wall\n- written on a chalkboard or glass surface\n- printed on product packaging, clothing, or a laptop screen\n- displayed on a realistic digital screen within the scene\n\nThe brand name must be fully readable and correctly spelled.\nThe phrase must be short, impactful, and clearly legible.\nThe text must NOT be a graphic overlay or UI element — it must exist physically in the photographed scene.\n\nImage requirements (strict):\n- Ultra-photorealistic, real-world photography look\n- Natural lighting, realistic shadows, authentic textures\n- Real camera depth of field, lens realism, sharp focus\n- High-end commercial photography quality\n- Real people, real environments, real materials\n\nStyle restrictions (mandatory):\n- No cartoon style\n- No illustration or digital art\n- No painting or artistic render\n- No 3D, CGI, or synthetic look\n- No anime or stylized visuals\n\nThe final image must look indistinguishable from a professional DSLR or mirrorless camera photograph, suitable for a premium Instagram advertisement.\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        560
+      ],
+      "id": "3ddde3f8-2698-4247-b4b0-8701d137ed27",
+      "name": "TextoImage"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"prompt\": \"Prompt for midjourney\"\t\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2112,
+        608
+      ],
+      "id": "a440a873-8777-476e-b73e-f3e68aa40309",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        400
+      ],
+      "id": "2f7c98d1-4b75-4ac8-8447-a4c0af4545fe",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "wX8448No1rghRifT",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        544
+      ],
+      "id": "641077ab-f4bf-46a6-8fc7-f72becdfce2f",
+      "name": "Wait",
+      "webhookId": "3ab0d9c2-36e4-4bb5-aea3-f45bff1e24dd"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "59570621-5ac3-4c1d-ba5b-1fc5d313fdee",
+              "name": "output.prompt",
+              "value": "={{ $json.output.prompt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        688
+      ],
+      "id": "0bb022f5-1dcd-4394-a5c9-293f26af91bb",
+      "name": "Prompt para Imagen Generado"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3d7c3b4-d32b-4ae8-a118-6d182a554770",
+              "name": "post",
+              "value": "={{ $('Post output').item.json.output.post }}",
+              "type": "string"
+            },
+            {
+              "id": "30d59414-36fc-4961-8356-bcfdd30864be",
+              "name": "imgprompt",
+              "value": "={{ $('Prompt para Imagen Generado').item.json.output.prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "ed21b63d-bab7-4440-b72e-5ffd43b731c8",
+              "name": "BrandVoice",
+              "value": "={{ $('Brand Voice Output').item.json.BrandVoice }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        16
+      ],
+      "id": "541e716f-747b-4c12-b578-d345c6b67752",
+      "name": "Output"
+    },
+    {
+      "parameters": {
+        "content": "## Prompts",
+        "height": 784,
+        "width": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        48
+      ],
+      "id": "ab71c3e2-6b27-4675-832d-6a89699a2419",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "= {{ $json.BrandVoice_Prompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1728,
+        -64
+      ],
+      "id": "fa3375e9-c600-40ed-931b-e1ab91ab95b7",
+      "name": "Brand Voice Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        128
+      ],
+      "id": "abd7bb52-850c-4468-bd5a-15fb64e9a5ee",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "wX8448No1rghRifT",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": {\n    \"9\": {\n      \"inputs\": {\n        \"filename_prefix\": \"z-image\",\n        \"images\": [\n          \"43\",\n          0\n        ]\n      },\n      \"class_type\": \"SaveImage\",\n      \"_meta\": {\n        \"title\": \"Save Image\"\n      }\n    },\n    \"39\": {\n      \"inputs\": {\n        \"clip_name\": \"qwen_3_4b.safetensors\",\n        \"type\": \"lumina2\",\n        \"device\": \"default\"\n      },\n      \"class_type\": \"CLIPLoader\",\n      \"_meta\": {\n        \"title\": \"Load CLIP\"\n      }\n    },\n    \"40\": {\n      \"inputs\": {\n        \"vae_name\": \"ae.safetensors\"\n      },\n      \"class_type\": \"VAELoader\",\n      \"_meta\": {\n        \"title\": \"Load VAE\"\n      }\n    },\n    \"41\": {\n      \"inputs\": {\n        \"width\": 512,\n        \"height\": 768,\n        \"batch_size\": 1\n      },\n      \"class_type\": \"EmptySD3LatentImage\",\n      \"_meta\": {\n        \"title\": \"EmptySD3LatentImage\"\n      }\n    },\n    \"42\": {\n      \"inputs\": {\n        \"conditioning\": [\n          \"45\",\n          0\n        ]\n      },\n      \"class_type\": \"ConditioningZeroOut\",\n      \"_meta\": {\n        \"title\": \"ConditioningZeroOut\"\n      }\n    },\n    \"43\": {\n      \"inputs\": {\n        \"samples\": [\n          \"44\",\n          0\n        ],\n        \"vae\": [\n          \"40\",\n          0\n        ]\n      },\n      \"class_type\": \"VAEDecode\",\n      \"_meta\": {\n        \"title\": \"VAE Decode\"\n      }\n    },\n    \"44\": {\n      \"inputs\": {\n        \"seed\": 0,\n        \"steps\": 9,\n        \"cfg\": 1,\n        \"sampler_name\": \"res_multistep\",\n        \"scheduler\": \"simple\",\n        \"denoise\": 1,\n        \"model\": [\n          \"47\",\n          0\n        ],\n        \"positive\": [\n          \"45\",\n          0\n        ],\n        \"negative\": [\n          \"42\",\n          0\n        ],\n        \"latent_image\": [\n          \"41\",\n          0\n        ]\n      },\n      \"class_type\": \"KSampler\",\n      \"_meta\": {\n        \"title\": \"KSampler\"\n      }\n    },\n    \"45\": {\n      \"inputs\": {\n        \"text\": \"{{ $('Prompt para Imagen Generado').item.json.output.prompt }}\",\n        \"clip\": [\n          \"39\",\n          0\n        ]\n      },\n      \"class_type\": \"CLIPTextEncode\",\n      \"_meta\": {\n        \"title\": \"CLIP Text Encode (Prompt)\"\n      }\n    },\n    \"46\": {\n      \"inputs\": {\n        \"unet_name\": \"z_image_turbo_bf16.safetensors\",\n        \"weight_dtype\": \"default\"\n      },\n      \"class_type\": \"UNETLoader\",\n      \"_meta\": {\n        \"title\": \"Load Diffusion Model\"\n      }\n    },\n    \"47\": {\n      \"inputs\": {\n        \"shift\": 3,\n        \"model\": [\n          \"46\",\n          0\n        ]\n      },\n      \"class_type\": \"ModelSamplingAuraFlow\",\n      \"_meta\": {\n        \"title\": \"ModelSamplingAuraFlow\"\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -240,
+        1008
+      ],
+      "id": "9b8b4cb4-00d8-4a1a-8b75-d4cb36f41f82",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90705ae4-7a50-4910-9f0f-4dcd1d2f155b",
+              "name": "BrandVoice",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        128
+      ],
+      "id": "f79c71bd-631c-4e2f-98c8-9fefc7d80ed9",
+      "name": "Brand Voice Output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d486891-2154-4935-b0ee-a559bb2d781c",
+              "name": "BrandVoice_Prompt",
+              "value": "=### Using the information provided, create a Brand Voice for this Brand.\nif web links are provided use them to get information.\n\n## Information:\n# Brand Name :  {{ $json.body.brand }}\n# Product name : {{ $json.body.product }}\n# Social Media Platforms this brand operates : {{ $json.body.platforms }}\n## Extra information : {{ $json.body.description }}\n## Web Links : {{ $json.body.sources }}\n\nYour response must be final and must have full information, no fillers, no gaps, no [put your link here] because no human will verify this, so allways use complete information",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        112
+      ],
+      "id": "1a3912d2-3495-4052-bc5e-dbfeb9613c48",
+      "name": "Brand Voice Generator Prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "19d5329e-487a-4d9b-9fe9-21552a4bdaae",
+              "name": "output.post",
+              "value": "={{ $json.output.posts }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        448
+      ],
+      "id": "375ee493-99a6-4b1f-9d0b-03357068bf6f",
+      "name": "Post output"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        160
+      ],
+      "id": "0d0412b4-b2aa-4941-967a-79076af99f2a",
+      "name": "Wait1",
+      "webhookId": "37a03665-d25b-4493-9664-4b4b78bef301"
+    },
+    {
+      "parameters": {
+        "content": "## Outputs",
+        "height": 816,
+        "width": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        16
+      ],
+      "id": "10f51b5d-fe11-4bb7-ab61-985cf5012570",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Agents",
+        "height": 944,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        -144
+      ],
+      "id": "4117e373-f2be-4a9d-a839-e844c2fbf7ac",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.PromptInicial }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1728,
+        176
+      ],
+      "id": "76e9deca-d199-4e45-a953-315f6b8e86a9",
+      "name": "Post Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.AI_Prompt }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1760,
+        512
+      ],
+      "id": "30ca69a3-0a92-435f-82a9-81f12bde8c5f",
+      "name": "Image Prompt Agent"
+    },
+    {
+      "parameters": {
+        "content": "## Entry Data",
+        "height": 320,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -400
+      ],
+      "id": "03b21827-62eb-4b7f-ae36-7d3a5b75d437",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.text\n// Output: cleaned text in items[0].json.cleaned\n\nconst input = $input.first().json.output.prompt || \"\";\n\n// keep only letters, numbers, spaces and . , ! ? -\nconst cleaned = input.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,!?-]/g, \"\");\n\nreturn [{\n  json: {\n    cleaned\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        944
+      ],
+      "id": "21065e7b-e335-4976-9223-2d778d512e12",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4cafcffc-77e6-42fd-9ec7-8c26b56f392c",
+              "leftValue": "={{ $json.cleaned }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        960
+      ],
+      "id": "06c5aacc-922b-4795-ab52-83194d11c747",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Datos de Entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Post Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datos de Entrada": {
+      "main": [
+        [
+          {
+            "node": "Brand Voice Generator Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Inicial": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Post Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TextoImage": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Image Prompt Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Image Prompt Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt para Imagen Generado": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Brand Voice Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Voice Agent": {
+      "main": [
+        [
+          {
+            "node": "Brand Voice Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Voice Generator Prompt": {
+      "main": [
+        [
+          {
+            "node": "Brand Voice Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Voice Output": {
+      "main": [
+        [
+          {
+            "node": "Prompt Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post output": {
+      "main": [
+        [
+          {
+            "node": "TextoImage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Post Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Agent": {
+      "main": [
+        [
+          {
+            "node": "Post output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt Agent": {
+      "main": [
+        [
+          {
+            "node": "Prompt para Imagen Generado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "48bd0764-16f8-4ae1-9789-65566887d0b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fea95b1e7fe66bc6246177426f3818db9165eb32c91897c9a950fa92951f6f99"
+  },
+  "id": "FAgXzZ0JBod7MvK2",
+  "tags": []
+}

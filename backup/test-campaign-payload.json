@@ -1,0 +1,9 @@
+{
+  "brand": "TestBrand",
+  "product": "TestProduct",
+  "platforms": ["instagram", "facebook"],
+  "tone": "professional",
+  "goal": "sales",
+  "visual_style": "modern",
+  "cta": "Buy Now"
+}

@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "AI Advertising Automation Platform",
+    "version": "0.1.0",
+    "description": "Generate AI-powered ads and automate publishing"
+  },
+  "features": {
+    "imageGeneration": true,
+    "videoGeneration": false,
+    "multiPlatform": true,
+    "scheduling": true,
+    "analytics": false
+  },
+  "platforms": {
+    "instagram": {
+      "enabled": true,
+      "formats": ["1:1", "4:5"]
+    },
+    "facebook": {
+      "enabled": true,
+      "formats": ["1:1", "4:5", "16:9"]
+    },
+    "youtube": {
+      "enabled": false,
+      "formats": ["16:9"]
+    }
+  },
+  "tones": [
+    "professional",
+    "casual",
+    "aggressive"
+  ],
+  "goals": [
+    "traffic",
+    "sales",
+    "branding"
+  ]
+}

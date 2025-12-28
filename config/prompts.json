@@ -1,0 +1,68 @@
+{
+  "models": {
+    "available": [
+      "@cf/meta/llama-3.1-8b-instruct",
+      "@cf/meta/llama-3.2-3b-instruct",
+      "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+      "@cf/blackforestlabs/flux-1-schnell"
+    ],
+    "current": "@cf/meta/llama-3.1-8b-instruct",
+    "text_generation": "@cf/meta/llama-3.1-8b-instruct",
+    "image_generation": "@cf/stabilityai/stable-diffusion-xl-base-1.0"
+  },
+  "usage": {
+    "daily_limit": 10000,
+    "current_usage": 0,
+    "reset_date": "2025-12-27"
+  },
+  "agents": {
+    "website_scraper": {
+      "name": "Website Content Scraper",
+      "description": "Extracts and analyzes website content for brand insights",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 1000,
+      "temperature": 0.7,
+      "prompt": "Analyze this website content and extract key brand insights:\n\nURL: {url}\nContent: {content}\n\nPlease provide:\n1. A brief summary of what this business does\n2. Key insights about their brand personality, values, and positioning\n3. Their target audience characteristics\n4. Visual/style cues mentioned or implied\n5. Unique value propositions or competitive advantages\n\nFormat as a structured analysis with clear sections."
+    },
+    "brand_voice_generator": {
+      "name": "Brand Voice Generator",
+      "description": "Creates comprehensive brand voice guidelines from website analysis",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 1500,
+      "temperature": 0.8,
+      "prompt": "Based on the website analyses and SWOT findings, create comprehensive brand voice recommendations:\n\nWebsite Analyses:\n{website_analyses}\n\nSWOT Summary:\nStrengths: {strengths}\nWeaknesses: {weaknesses}\nOpportunities: {opportunities}\nThreats: {threats}\n\nCreate detailed brand voice guidelines including:\n1. Core personality traits\n2. Communication style and tone\n3. Key messaging principles\n4. Language preferences and restrictions\n5. Brand positioning recommendations\n6. Content strategy suggestions\n\nMake the recommendations specific, actionable, and aligned with the business analysis."
+    },
+    "content_creator": {
+      "name": "Bulk Content Creator",
+      "description": "Generates social media posts in bulk based on brand voice",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 2000,
+      "temperature": 0.9,
+      "prompt": "Create {count} social media posts for {platform}.\n\nBRAND VOICE: {brand_voice}\n\nCATEGORY: {category}\nGOALS: {goals}\n\nCreate {count} posts that match the brand voice. Each post should be engaging and include 3-5 relevant hashtags.\n\nFormat:\nPost 1: [post text with hashtags]\nPost 2: [post text with hashtags]\nPost 3: [post text with hashtags]\n(etc.)"
+    },
+    "swot_analyzer": {
+      "name": "SWOT Analysis Generator",
+      "description": "Creates structured SWOT analysis from business data",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 1200,
+      "temperature": 0.6,
+      "prompt": "Based on the following website analyses, create a comprehensive business analysis:\n\nFocus Area: {focus}\nAnalysis Depth: {depth}\n\nWebsite Analyses:\n{website_analyses}\n\nPlease provide:\n\n1. **OVERVIEW**: A comprehensive summary of the business based on all websites analyzed\n\n2. **SWOT ANALYSIS** with specific, actionable points:\n   - Strengths (internal positive factors)\n   - Weaknesses (internal negative factors)\n   - Opportunities (external positive factors)\n   - Threats (external negative factors)\n\n3. **RECOMMENDATIONS**: 5-8 specific, prioritized recommendations for improvement\n\nFormat the SWOT as structured lists. Make all analysis specific to the {focus} industry and {depth} analysis depth."
+    },
+    "image_prompt_generator": {
+      "name": "Image Prompt Generator",
+      "description": "Creates detailed prompts for AI image generation",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 800,
+      "temperature": 0.8,
+      "prompt": "Generate detailed, professional image generation prompts for an advertising campaign.\n\nBrand: {brand_name}\nVisual Style: {visual_style}\nProduct: {product_name}\nTarget Audience: {target_audience}\nCampaign Goal: {campaign_goal}\n\nCreate 3-5 highly detailed image prompts that:\n- Are optimized for AI image generation\n- Incorporate brand elements and visual style\n- Show the product in context\n- Appeal to the target audience\n- Support the campaign goal\n- Are ultra-realistic and Instagram-worthy\n- Include specific details about lighting, composition, colors, and mood"
+    },
+    "brand_insights_aggregator": {
+      "name": "Brand Insights Aggregator",
+      "description": "Combines multiple website analyses into unified brand insights",
+      "model": "@cf/meta/llama-3.1-8b-instruct",
+      "max_tokens": 800,
+      "temperature": 0.7,
+      "prompt": "Based on these website insights, create a comprehensive brand analysis:\n\nIndustry: {industry}\nInsights: {insights}\n\nPlease analyze and provide:\n1. BRAND PERSONALITY: Key personality traits\n2. CORE VALUES: Main values and principles\n3. POSITIONING: How they position themselves in the market\n4. OPPORTUNITIES: Potential areas for content/marketing focus\n\nFormat each section clearly."
+    }
+  }
+}
