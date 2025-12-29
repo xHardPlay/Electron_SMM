@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface Workspace {
   id: number
@@ -21,6 +21,8 @@ export default function Dashboard() {
   const [showAdForm, setShowAdForm] = useState(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState('')
   const [analysisUrl, setAnalysisUrl] = useState('')
+  const [analysisType, setAnalysisType] = useState<'url' | 'file'>('url')
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [selectedAnalysis, setSelectedAnalysis] = useState<string>('')
   const [adType, setAdType] = useState<string>('linkedin_post')
   const [adTopic, setAdTopic] = useState('')
@@ -209,7 +211,7 @@ export default function Dashboard() {
 
   const handleStartAnalysis = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedWorkspace || !analysisUrl.trim()) return
+    if (!selectedWorkspace || (analysisType === 'url' && !analysisUrl.trim()) || (analysisType === 'file' && !uploadedFile)) return
 
     setLoading(true)
     setMessage('')
@@ -218,24 +220,43 @@ export default function Dashboard() {
     if (!token) return
 
     try {
-      const response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          workspace_id: parseInt(selectedWorkspace),
-          url: analysisUrl,
-          analysis_type: 'url'
-        }),
-      })
+      let response: Response
+
+      if (analysisType === 'url') {
+        response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            workspace_id: parseInt(selectedWorkspace),
+            url: analysisUrl,
+            analysis_type: 'url'
+          }),
+        })
+      } else {
+        // File upload
+        const formData = new FormData()
+        formData.append('workspace_id', selectedWorkspace)
+        formData.append('file', uploadedFile!)
+        formData.append('analysis_type', 'file')
+
+        response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        })
+      }
 
       const data = await response.json()
 
       if (response.ok) {
         setMessage('Analysis started! Check back in a few moments for results.')
         setAnalysisUrl('')
+        setUploadedFile(null)
         setShowAnalysisForm(false)
         fetchAnalyses(selectedWorkspace, token) // Refresh the list
       } else {
@@ -483,23 +504,75 @@ export default function Dashboard() {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="analysisUrl" className="block text-sm font-medium mb-1">
-                  Website URL
+                <label className="block text-sm font-medium mb-2">
+                  Analysis Type
                 </label>
-                <input
-                  type="url"
-                  id="analysisUrl"
-                  value={analysisUrl}
-                  onChange={(e) => setAnalysisUrl(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://example.com"
-                />
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="url"
+                      checked={analysisType === 'url'}
+                      onChange={(e) => setAnalysisType(e.target.value as 'url' | 'file')}
+                      className="mr-2"
+                    />
+                    Website URL
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="file"
+                      checked={analysisType === 'file'}
+                      onChange={(e) => setAnalysisType(e.target.value as 'url' | 'file')}
+                      className="mr-2"
+                    />
+                    Upload Document
+                  </label>
+                </div>
               </div>
+
+              {analysisType === 'url' ? (
+                <div className="mb-4">
+                  <label htmlFor="analysisUrl" className="block text-sm font-medium mb-1">
+                    Website URL
+                  </label>
+                  <input
+                    type="url"
+                    id="analysisUrl"
+                    value={analysisUrl}
+                    onChange={(e) => setAnalysisUrl(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              ) : (
+                <div className="mb-4">
+                  <label htmlFor="fileUpload" className="block text-sm font-medium mb-1">
+                    Upload Document
+                  </label>
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    accept=".pdf,.docx,.txt,.md"
+                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supported formats: PDF, DOCX, TXT, MD (max 10MB)
+                  </p>
+                  {uploadedFile && (
+                    <p className="text-sm text-green-600 mt-1">
+                      Selected: {uploadedFile.name}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <button
                 type="submit"
-                disabled={loading || !selectedWorkspace}
+                disabled={loading || !selectedWorkspace || (analysisType === 'url' && !analysisUrl.trim()) || (analysisType === 'file' && !uploadedFile)}
                 className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
               >
                 {loading ? 'Starting Analysis...' : 'Start Analysis'}
@@ -635,14 +708,23 @@ export default function Dashboard() {
                   {analyses.map((analysis) => (
                     <div key={analysis.id} className="border border-gray-200 rounded-md p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-lg font-medium">{analysis.url}</h4>
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          analysis.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          analysis.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {analysis.status}
-                        </span>
+                        <h4 className="text-lg font-medium">
+                          {analysis.analysis_type === 'file' ? analysis.file_name : analysis.url}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded text-sm ${
+                            analysis.analysis_type === 'file' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {analysis.analysis_type === 'file' ? 'Document' : 'Website'}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-sm ${
+                            analysis.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            analysis.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {analysis.status}
+                          </span>
+                        </div>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">
                         Created: {new Date(analysis.created_at).toLocaleDateString()}

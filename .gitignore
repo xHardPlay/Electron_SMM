@@ -13,3 +13,6 @@ backend/package-lock.json
 /backup
 /frontend/.next
 /frontend/node_modules
+/frontend/out
+/frontend/out/_next
+/frontend/out/_next
