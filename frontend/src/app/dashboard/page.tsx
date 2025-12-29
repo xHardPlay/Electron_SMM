@@ -141,24 +141,71 @@ export default function Dashboard() {
 
   const fetchAnalyses = async (workspaceId: string, token: string) => {
     try {
-      console.log('Fetching analyses for workspace:', workspaceId)
+      console.log('🔍 FETCHING ANALYSES - Request Details:')
+      console.log('  Workspace ID:', workspaceId)
+      console.log('  URL:', `https://electron-backend.carlos-mdtz9.workers.dev/api/analyses?workspace_id=${workspaceId}`)
+      console.log('  Headers:', { 'Authorization': `Bearer ${token.substring(0, 20)}...` })
+
+      const startTime = Date.now()
       const response = await fetch(`https://electron-backend.carlos-mdtz9.workers.dev/api/analyses?workspace_id=${workspaceId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       })
+      const endTime = Date.now()
+
+      console.log('📡 HTTP RESPONSE - Status Details:')
+      console.log('  Status:', response.status, response.statusText)
+      console.log('  Response Time:', endTime - startTime, 'ms')
+      console.log('  Headers:', Object.fromEntries(response.headers.entries()))
+      console.log('  Response:', response)
 
       if (response.ok) {
         const data = await response.json()
-        console.log('Analyses fetched:', data.analyses)
+        console.log('✅ SUCCESS - Analysis Data:')
+        console.log('  Total analyses:', data.analyses?.length || 0)
+        console.log('  Analyses details:', data.analyses?.map((a: any) => ({
+          id: a.id,
+          name: a.name,
+          status: a.status,
+          analysis_type: a.analysis_type,
+          ai_analysis_length: a.ai_analysis?.length || 0,
+          has_structured_data: !!a.structured_data
+        })) || [])
+
+        // Log detailed AI analysis content for debugging
+        if (data.analyses && data.analyses.length > 0) {
+          data.analyses.forEach((analysis: any, index: number) => {
+            console.log(`📄 Analysis #${index + 1} - ${analysis.name}:`)
+            console.log('  Status:', analysis.status)
+            console.log('  AI Analysis Length:', analysis.ai_analysis?.length || 0)
+            if (analysis.ai_analysis) {
+              console.log('  AI Analysis Preview (first 4000 chars):', analysis.ai_analysis.substring(0, 4000))
+              if (analysis.ai_analysis.length > 4000) {
+                console.log('  ... (truncated, full length:', analysis.ai_analysis.length, 'chars)')
+              }
+            }
+            if (analysis.structured_data) {
+              console.log('  Structured Data:', analysis.structured_data)
+            }
+          })
+        }
+
         setAnalyses(data.analyses || [])
       } else {
-        console.error('Failed to fetch analyses:', response.status, response.statusText)
+        console.error('❌ FAILED - HTTP Error Details:')
+        console.error('  Status:', response.status, response.statusText)
         const errorText = await response.text()
-        console.error('Error response:', errorText)
+        console.error('  Error Response Body:', errorText)
+        console.error('  Full Response:', response)
       }
     } catch (error) {
-      console.error('Error fetching analyses:', error)
+      console.error('💥 NETWORK ERROR - Fetch Analyses Failed:')
+      console.error('  Error:', error)
+      console.error('  Error Type:', error instanceof Error ? error.constructor.name : typeof error)
+      if (error instanceof Error) {
+        console.error('  Stack Trace:', error.stack)
+      }
     }
   }
 
@@ -482,6 +529,45 @@ export default function Dashboard() {
     }
   }
 
+  const handleDeleteWorkspace = async (workspaceId: string, workspaceName: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the workspace "${workspaceName}"?\n\nThis will permanently delete all analyses, characters, ads, and images associated with this workspace. This action cannot be undone.`
+    )
+
+    if (!confirmed) return
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`https://electron-backend.carlos-mdtz9.workers.dev/api/workspaces/${workspaceId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        setMessage('Workspace deleted successfully!')
+        // If the deleted workspace was selected, clear selection
+        if (selectedWorkspace === workspaceId) {
+          setSelectedWorkspace('')
+          setAnalyses([])
+          setCharacters([])
+          setAds([])
+          setCharacterImages([])
+        }
+        // Refresh workspaces list
+        fetchWorkspaces(token)
+      } else {
+        const data = await response.json()
+        setMessage(data.error || 'Failed to delete workspace')
+      }
+    } catch (error) {
+      setMessage('Network error')
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('userId')
@@ -499,15 +585,23 @@ export default function Dashboard() {
         <h2 className="text-2xl font-bold mb-6">Workspaces</h2>
         <div className="space-y-2">
           {workspaces.map((workspace) => (
-            <button
-              key={workspace.id}
-              onClick={() => handleWorkspaceSelect(workspace.id.toString())}
-              className={`w-full text-left px-4 py-2 rounded-md hover:bg-gray-700 ${
-                selectedWorkspace === workspace.id.toString() ? 'bg-gray-700' : ''
-              }`}
-            >
-              {workspace.name}
-            </button>
+            <div key={workspace.id} className="flex items-center">
+              <button
+                onClick={() => handleWorkspaceSelect(workspace.id.toString())}
+                className={`flex-1 text-left px-4 py-2 rounded-l-md hover:bg-gray-700 ${
+                  selectedWorkspace === workspace.id.toString() ? 'bg-gray-700' : ''
+                }`}
+              >
+                {workspace.name}
+              </button>
+              <button
+                onClick={() => handleDeleteWorkspace(workspace.id.toString(), workspace.name)}
+                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-r-md"
+                title="Delete workspace"
+              >
+                ✕
+              </button>
+            </div>
           ))}
         </div>
         <button

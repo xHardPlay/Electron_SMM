@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Electron - Marketing Tool',
+  title: 'AgencySMM - Marketing Tool',
   description: 'AI-powered marketing tool built with CloudFlare',
   icons: {
     icon: '/favicon.ico',

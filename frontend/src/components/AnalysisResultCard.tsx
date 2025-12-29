@@ -20,59 +20,137 @@ interface AnalysisResultCardProps {
 export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResultCardProps) {
   // Parse and fix the AI analysis JSON response
   const parseAnalysisJSON = (text: string) => {
+    console.log('🔍 PARSING ANALYSIS JSON - Starting parse process')
+    console.log('  Raw text length:', text.length)
+    console.log('  Raw text preview (first 4000 chars):', text.substring(0, 2000))
+    console.log('  Raw text preview (last 4000 chars):', text.substring(Math.max(0, text.length - 2000)))
+
+    // Show the FULL raw response in console for debugging
+    console.log('🎯 FULL RAW RESPONSE (for debugging):')
+    console.log(text)
+
     try {
       // First attempt: direct JSON parse
+      console.log('📋 ATTEMPT 1: Direct JSON parse')
       const parsed = JSON.parse(text)
       if (parsed.brand_profile) {
+        console.log('✅ SUCCESS: Direct JSON parse worked!')
+        console.log('  Parsed brand_profile keys:', Object.keys(parsed.brand_profile))
         return parsed.brand_profile
       }
+      console.log('⚠️  Direct parse succeeded but no brand_profile found')
       return null
     } catch (error) {
-      console.error('Error parsing analysis JSON:', error)
+      console.error('❌ ATTEMPT 1 FAILED: Direct JSON parse error:', error)
+      console.error('  Error details:', error instanceof Error ? error.message : String(error))
 
-      // Second attempt: try to extract JSON from markdown code blocks or mixed content
+      // Second attempt: try to extract JSON from markdown code blocks (most common AI format)
+      console.log('📋 ATTEMPT 2: Markdown code block extraction')
       try {
         // Look for JSON in markdown code blocks first
         const markdownJsonMatch = text.match(/```(?:json)?\s*\n?(\{[\s\S]*?\})\s*\n?```/)
         if (markdownJsonMatch && markdownJsonMatch[1]) {
-          console.log('Found JSON in markdown code block, attempting to parse...')
+          console.log('  Found JSON in markdown code block, attempting to parse...')
+          console.log('  Extracted JSON length:', markdownJsonMatch[1].length)
+          console.log('  Extracted JSON preview:', markdownJsonMatch[1].substring(0, 4000))
           const extractedJson = fixMalformedJSON(markdownJsonMatch[1])
           const parsed = JSON.parse(extractedJson)
           if (parsed.brand_profile) {
-            console.log('Successfully parsed JSON from markdown!')
+            console.log('✅ SUCCESS: Parsed JSON from markdown!')
+            console.log('  Parsed brand_profile keys:', Object.keys(parsed.brand_profile))
             return parsed.brand_profile
           }
-        }
-
-        // Third attempt: try to fix common JSON issues on the whole text
-        const fixedText = fixMalformedJSON(text)
-        if (fixedText !== text) {
-          console.log('Attempting to fix malformed JSON...')
-          const parsed = JSON.parse(fixedText)
-          if (parsed.brand_profile) {
-            console.log('Successfully fixed and parsed JSON!')
-            return parsed.brand_profile
-          }
+          console.log('⚠️  Markdown extraction succeeded but no brand_profile found')
+        } else {
+          console.log('  No markdown code blocks found')
         }
       } catch (fixError) {
-        console.error('Failed to fix JSON:', fixError)
+        console.error('❌ ATTEMPT 2 FAILED: Markdown extraction error:', fixError)
+        console.error('  Error details:', fixError instanceof Error ? fixError.message : String(fixError))
       }
 
-      // Fourth attempt: try to extract JSON from mixed content (fallback)
-      try {
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          const extractedJson = fixMalformedJSON(jsonMatch[0])
-          const parsed = JSON.parse(extractedJson)
-          if (parsed.brand_profile) {
-            console.log('Successfully extracted and parsed JSON!')
-            return parsed.brand_profile
-          }
+      console.error('💥 ALL PARSING ATTEMPTS FAILED - Showing raw response as fallback')
+      console.log('  Final raw text that failed to parse:', text)
+      return null
+    }
+  }
+
+  // Parse Markdown response and convert to brand profile JSON structure
+  const parseMarkdownToBrandProfile = (markdown: string) => {
+    console.log('Parsing Markdown response to extract brand profile data')
+
+    try {
+      const profile: any = {
+        brand_name: '',
+        brand_identity: {},
+        brand_strategy: {},
+        brand_voice_guide: {},
+        social_media_content_mix: {}
+      }
+
+      // Extract brand name from title
+      const titleMatch = markdown.match(/\*\*Brand Analysis:\s*([^*]+)\*\*/)
+      if (titleMatch) {
+        profile.brand_name = titleMatch[1].trim()
+        console.log('Extracted brand name:', profile.brand_name)
+      }
+
+      // Extract sections using regex patterns
+      const sections = markdown.split(/\*\*([^*]+)\*\*/).filter(s => s.trim())
+
+      for (let i = 0; i < sections.length - 1; i += 2) {
+        const sectionName = sections[i].trim()
+        const sectionContent = sections[i + 1].trim()
+        console.log(`Processing section: ${sectionName}`)
+
+        switch (sectionName.toLowerCase()) {
+          case 'overview':
+            profile.brand_identity.business_overview = sectionContent
+            break
+
+          case 'brand identity':
+            // Parse bullet points in brand identity
+            const identityItems = sectionContent.split(/\*\s*\*\*([^*]+):\*\*/).filter(s => s.trim())
+            for (let j = 0; j < identityItems.length - 1; j += 2) {
+              const itemName = identityItems[j].trim().toLowerCase().replace(/\s+/g, '_')
+              const itemContent = identityItems[j + 1].trim()
+              profile.brand_identity[itemName] = itemContent
+            }
+            break
+
+          case 'target audience':
+            // Parse bullet points in target audience
+            const audienceItems = sectionContent.split(/\*\s*\*\*([^*]+):\*\*/).filter(s => s.trim())
+            for (let j = 0; j < audienceItems.length - 1; j += 2) {
+              const itemName = audienceItems[j].trim().toLowerCase().replace(/\s+/g, '_')
+              const itemContent = audienceItems[j + 1].trim()
+              profile.brand_identity[itemName] = itemContent
+            }
+            break
+
+          case 'messaging':
+            // This section seems incomplete in the sample, but we can handle it
+            profile.messaging = sectionContent
+            break
+
+          default:
+            console.log(`Unknown section: ${sectionName}`)
         }
-      } catch (extractError) {
-        console.error('Failed to extract JSON:', extractError)
       }
 
+      // Set some defaults for required fields if missing
+      if (!profile.brand_identity.competitive_landscape) {
+        profile.brand_identity.competitive_landscape = []
+      }
+      if (!profile.brand_voice_guide.words_to_use) {
+        profile.brand_voice_guide.words_to_use = []
+      }
+
+      console.log('Successfully parsed Markdown to profile:', profile)
+      return profile
+
+    } catch (error) {
+      console.error('Error parsing Markdown to brand profile:', error)
       return null
     }
   }
@@ -168,10 +246,18 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
               </span>
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                 analysis.status === 'completed' ? 'bg-green-100 text-green-800' :
+                analysis.status === 'analyzing_content' ? 'bg-blue-100 text-blue-800' :
+                analysis.status === 'processing_ai' ? 'bg-purple-100 text-purple-800' :
+                analysis.status === 'parsing_results' ? 'bg-green-100 text-green-800' :
+                analysis.status === 'finalizing' ? 'bg-indigo-100 text-indigo-800' :
                 analysis.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
                 'bg-red-100 text-red-800'
               }`}>
                 {analysis.status === 'completed' ? '✅ Complete' :
+                 analysis.status === 'analyzing_content' ? '📊 Analyzing' :
+                 analysis.status === 'processing_ai' ? '🤖 AI Processing' :
+                 analysis.status === 'parsing_results' ? '🔧 Parsing' :
+                 analysis.status === 'finalizing' ? '✨ Finalizing' :
                  analysis.status === 'processing' ? '⚡ Processing' : '❌ Failed'}
               </span>
             </div>
@@ -389,18 +475,22 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                         </div>
                         <h4 className="font-bold text-red-900">Competitive Landscape</h4>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {brandProfile.brand_identity.competitive_landscape.map((competitor: string, index: number) => (
-                          <div key={index} className="bg-white rounded-lg p-3 shadow-sm border border-red-200">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-xs font-bold text-red-600">{index + 1}</span>
+                      {Array.isArray(brandProfile.brand_identity.competitive_landscape) ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {brandProfile.brand_identity.competitive_landscape.map((competitor: string, index: number) => (
+                            <div key={index} className="bg-white rounded-lg p-3 shadow-sm border border-red-200">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <span className="text-xs font-bold text-red-600">{index + 1}</span>
+                                </div>
+                                <span className="text-sm font-medium text-red-800">{competitor}</span>
                               </div>
-                              <span className="text-sm font-medium text-red-800">{competitor}</span>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-red-800 leading-relaxed">{brandProfile.brand_identity.competitive_landscape}</p>
+                      )}
                     </div>
                   )}
 
@@ -734,7 +824,7 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                               fill="none"
                               stroke="#3b82f6"
                               strokeWidth="3"
-                              strokeDasharray={`${parseInt(brandProfile.social_media_content_mix.value_education.replace(' percent', '')) * 1.1}, 110`}
+                              strokeDasharray={`${parseInt((brandProfile.social_media_content_mix?.value_education || '0 percent').replace(' percent', '')) * 1.1}, 110`}
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -759,7 +849,7 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                               fill="none"
                               stroke="#10b981"
                               strokeWidth="3"
-                              strokeDasharray={`${parseInt(brandProfile.social_media_content_mix.connection_story.replace(' percent', '')) * 1.1}, 110`}
+                              strokeDasharray={`${parseInt((brandProfile.social_media_content_mix?.connection_story || '0 percent').replace(' percent', '')) * 1.1}, 110`}
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -784,7 +874,7 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                               fill="none"
                               stroke="#8b5cf6"
                               strokeWidth="3"
-                              strokeDasharray={`${parseInt(brandProfile.social_media_content_mix.proof_authority.replace(' percent', '')) * 1.1}, 110`}
+                              strokeDasharray={`${parseInt((brandProfile.social_media_content_mix?.proof_authority || '0 percent').replace(' percent', '')) * 1.1}, 110`}
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -809,7 +899,7 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                               fill="none"
                               stroke="#f59e0b"
                               strokeWidth="3"
-                              strokeDasharray={`${parseInt(brandProfile.social_media_content_mix.direct_promotion.replace(' percent', '')) * 1.1}, 110`}
+                              strokeDasharray={`${parseInt((brandProfile.social_media_content_mix?.direct_promotion || '0 percent').replace(' percent', '')) * 1.1}, 110`}
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
@@ -911,12 +1001,24 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                   </svg>
                   <div>
                     <p className="text-sm font-medium text-orange-800">JSON Parsing Failed</p>
-                    <p className="text-xs text-orange-700">Showing raw AI response below</p>
+                    <p className="text-xs text-orange-700">The AI response appears to be malformed. Check browser console for full debug info.</p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      Response length: {analysis.ai_analysis?.length || 0} characters
+                    </p>
                   </div>
                 </div>
               </div>
+              <details className="mb-4">
+                <summary className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900">
+                  Show Full Raw Response (Debug Info)
+                </summary>
+                <div className="mt-2 text-gray-700 leading-relaxed whitespace-pre-wrap text-xs max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50 font-mono">
+                  {analysis.ai_analysis}
+                </div>
+              </details>
               <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50">
-                {analysis.ai_analysis}
+                <p className="text-sm text-gray-600 mb-2 italic">Last 500 characters (where error likely occurred):</p>
+                {analysis.ai_analysis?.substring(Math.max(0, (analysis.ai_analysis.length || 0) - 500)) || 'No response'}
               </div>
             </div>
           )}
@@ -928,6 +1030,48 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
             <div>
               <p className="text-yellow-800 font-medium">Analysis in Progress</p>
               <p className="text-yellow-600 text-sm">AI is processing your content. This may take a few minutes...</p>
+            </div>
+          </div>
+        </div>
+      ) : analysis.status === 'analyzing_content' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <div>
+              <p className="text-blue-800 font-medium">📊 Analyzing Content</p>
+              <p className="text-blue-600 text-sm">Extracting and processing content from your sources...</p>
+            </div>
+          </div>
+        </div>
+      ) : analysis.status === 'processing_ai' ? (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="animate-pulse">
+              <div className="w-5 h-5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+            </div>
+            <div>
+              <p className="text-purple-800 font-medium">🤖 AI Processing</p>
+              <p className="text-purple-600 text-sm">AI is analyzing your content and generating insights...</p>
+            </div>
+          </div>
+        </div>
+      ) : analysis.status === 'parsing_results' ? (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+            <div>
+              <p className="text-green-800 font-medium">🔧 Parsing Results</p>
+              <p className="text-green-600 text-sm">Validating and structuring the analysis results...</p>
+            </div>
+          </div>
+        </div>
+      ) : analysis.status === 'finalizing' ? (
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+            <div>
+              <p className="text-indigo-800 font-medium">✨ Finalizing Analysis</p>
+              <p className="text-indigo-600 text-sm">Putting the finishing touches on your comprehensive analysis...</p>
             </div>
           </div>
         </div>

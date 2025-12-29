@@ -135,7 +135,7 @@ function parseAnalysisJSON(text) {
   } catch (error) {
     console.log('  ❌ Direct parse failed:', error.message);
 
-    // Second attempt: try to extract JSON from markdown code blocks
+    // Second attempt: try to extract JSON from markdown code blocks (most common AI format)
     try {
       console.log('  📋 Attempt 2: Markdown extraction');
       // Look for JSON in markdown code blocks first
@@ -154,44 +154,6 @@ function parseAnalysisJSON(text) {
       }
     } catch (fixError) {
       console.log('  ❌ Markdown extraction failed:', fixError.message);
-    }
-
-    // Third attempt: try to fix common JSON issues on the whole text
-    try {
-      console.log('  📋 Attempt 3: JSON fixing');
-      const fixedText = fixMalformedJSON(text);
-      if (fixedText !== text) {
-        console.log('  🔧 Applied JSON fixes, attempting parse...');
-        const parsed = JSON.parse(fixedText);
-        if (parsed.brand_profile) {
-          console.log('  ✅ JSON fixing successful');
-          return parsed.brand_profile;
-        }
-      } else {
-        console.log('  ⚠️  No fixes needed or applied');
-      }
-    } catch (fixError) {
-      console.log('  ❌ JSON fixing failed:', fixError.message);
-    }
-
-    // Fourth attempt: try to extract JSON from mixed content (fallback)
-    try {
-      console.log('  📋 Attempt 4: Mixed content extraction');
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        console.log('  🎯 Found JSON-like content in mixed text');
-        const extractedJson = fixMalformedJSON(jsonMatch[0]);
-        console.log('  🔧 Fixed extracted JSON, attempting parse...');
-        const parsed = JSON.parse(extractedJson);
-        if (parsed.brand_profile) {
-          console.log('  ✅ Mixed content extraction successful');
-          return parsed.brand_profile;
-        }
-      } else {
-        console.log('  ⚠️  No JSON-like content found');
-      }
-    } catch (extractError) {
-      console.log('  ❌ Mixed content extraction failed:', extractError.message);
     }
 
     console.log('  🚫 All parsing attempts failed');

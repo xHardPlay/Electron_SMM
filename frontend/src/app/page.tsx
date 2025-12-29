@@ -11,7 +11,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
         <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-in-200/30 lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Welcome to Electron
+          Welcome to AgencySMM
         </p>
         <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
           <Link
@@ -31,7 +31,7 @@ export default function Home() {
 
       <div className="relative flex place-items-center flex-col">
         <h1 className="text-4xl font-bold">
-          Electron - Marketing Tool
+          AgencySMM - Marketing Tool
         </h1>
         <p className="text-lg mt-2 text-gray-600 dark:text-gray-400">
           Times we've iterated with AI: {iterations}
@@ -74,6 +74,20 @@ export default function Home() {
             Generate ads using AI characters.
           </p>
         </div>
+      </div>
+
+      <div className="text-center text-sm text-gray-500">
+        <p>
+          Created on 28-12-2025 •{' '}
+          <Link
+            href="https://clearfuturecs.com/"
+            className="text-blue-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Clear Future CS
+          </Link>
+        </p>
       </div>
     </main>
   )

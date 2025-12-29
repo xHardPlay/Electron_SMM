@@ -1,0 +1,5 @@
+name = "electron-frontend"
+compatibility_date = "2023-12-01"
+
+# Cloudflare Pages configuration
+pages_build_output_dir = "out"
