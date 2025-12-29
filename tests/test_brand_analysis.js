@@ -32,7 +32,7 @@ async function testBrandAnalysis() {
     results.pass('Setup for brand analysis test');
 
     // Test analysis creation
-    const testUrl = 'https://example.com'; // Simple test URL
+    const testUrl = 'https://httpbin.org/html'; // Test URL with actual HTML content
     const analysisResult = await createAnalysis(token, workspaceId, testUrl);
 
     if (!analysisResult.analysis || analysisResult.analysis.status !== 'processing') {

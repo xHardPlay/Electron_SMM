@@ -111,11 +111,29 @@ async function getWorkspaces(token) {
  * Brand analysis utilities
  */
 async function createAnalysis(token, workspaceId, url) {
-  return makeRequest('/api/analyses', {
+  const formData = new FormData();
+  formData.append('workspace_id', workspaceId.toString());
+  formData.append('url_0', url); // Frontend uses url_0, url_1, etc.
+  formData.append('analysis_type', 'brand'); // Backend expects 'brand' or 'product', not 'url'
+  formData.append('name', `Analysis ${Date.now()}`);
+
+  // Create custom fetch options for FormData
+  const url_endpoint = `${BASE_URL}/api/analyses`;
+  const response = await fetch(url_endpoint, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
-    body: { workspace_id: workspaceId, url, analysis_type: 'url' },
+    headers: {
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - let browser set it with boundary
+    },
+    body: formData
   });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`${response.status}: ${error}`);
+  }
+
+  return response.json();
 }
 
 async function getAnalyses(token, workspaceId) {

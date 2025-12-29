@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import AnalysisResultCard from '../../components/AnalysisResultCard'
 
 interface Workspace {
   id: number
@@ -20,17 +21,22 @@ export default function Dashboard() {
   const [showCharacterForm, setShowCharacterForm] = useState(false)
   const [showAdForm, setShowAdForm] = useState(false)
   const [newWorkspaceName, setNewWorkspaceName] = useState('')
-  const [analysisUrl, setAnalysisUrl] = useState('')
-  const [analysisType, setAnalysisType] = useState<'url' | 'file'>('url')
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [selectedAnalysis, setSelectedAnalysis] = useState<string>('')
+  // New state for enhanced Brand Discovery
+  const [analysisType, setAnalysisType] = useState<'brand' | 'product'>('brand')
+  const [brandName, setBrandName] = useState('')
+  const [productName, setProductName] = useState('')
+  const [analysisUrls, setAnalysisUrls] = useState<string[]>([''])
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [adType, setAdType] = useState<string>('linkedin_post')
   const [adTopic, setAdTopic] = useState('')
   const [adQuantity, setAdQuantity] = useState<number>(1)
   const [selectedCharacters, setSelectedCharacters] = useState<number[]>([])
   const [ads, setAds] = useState<any[]>([])
+  const [characterImages, setCharacterImages] = useState<any[]>([])
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -45,6 +51,37 @@ export default function Dashboard() {
     setUserId(storedUserId)
     fetchWorkspaces(token)
   }, [router])
+
+  // Polling effect for analysis updates
+  useEffect(() => {
+    if (selectedWorkspace && analyses.some(a => a.status === 'processing')) {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      // Start polling every 5 seconds
+      const interval = setInterval(() => {
+        fetchAnalyses(selectedWorkspace, token)
+      }, 5000)
+
+      setPollingInterval(interval)
+
+      return () => {
+        clearInterval(interval)
+        setPollingInterval(null)
+      }
+    } else if (pollingInterval) {
+      // Clear polling when no analyses are processing
+      clearInterval(pollingInterval)
+      setPollingInterval(null)
+    }
+
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval)
+        setPollingInterval(null)
+      }
+    }
+  }, [selectedWorkspace, analyses, pollingInterval])
 
   const fetchWorkspaces = async (token: string) => {
     try {
@@ -104,6 +141,7 @@ export default function Dashboard() {
 
   const fetchAnalyses = async (workspaceId: string, token: string) => {
     try {
+      console.log('Fetching analyses for workspace:', workspaceId)
       const response = await fetch(`https://electron-backend.carlos-mdtz9.workers.dev/api/analyses?workspace_id=${workspaceId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -112,9 +150,12 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Analyses fetched:', data.analyses)
         setAnalyses(data.analyses || [])
       } else {
-        console.error('Failed to fetch analyses')
+        console.error('Failed to fetch analyses:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
       }
     } catch (error) {
       console.error('Error fetching analyses:', error)
@@ -211,7 +252,16 @@ export default function Dashboard() {
 
   const handleStartAnalysis = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedWorkspace || (analysisType === 'url' && !analysisUrl.trim()) || (analysisType === 'file' && !uploadedFile)) return
+
+    if (!selectedWorkspace) return
+
+    const name = analysisType === 'brand' ? brandName : productName
+    if (!name.trim()) return
+
+    if (analysisUrls.length === 0 && uploadedFiles.length === 0) {
+      setMessage('Please add at least one URL or upload a file')
+      return
+    }
 
     setLoading(true)
     setMessage('')
@@ -220,43 +270,39 @@ export default function Dashboard() {
     if (!token) return
 
     try {
-      let response: Response
+      const formData = new FormData()
+      formData.append('workspace_id', selectedWorkspace)
+      formData.append('analysis_type', analysisType)
+      formData.append('name', name)
 
-      if (analysisType === 'url') {
-        response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            workspace_id: parseInt(selectedWorkspace),
-            url: analysisUrl,
-            analysis_type: 'url'
-          }),
-        })
-      } else {
-        // File upload
-        const formData = new FormData()
-        formData.append('workspace_id', selectedWorkspace)
-        formData.append('file', uploadedFile!)
-        formData.append('analysis_type', 'file')
+      // Add URLs
+      analysisUrls.forEach((url, index) => {
+        if (url.trim()) {
+          formData.append(`url_${index}`, url.trim())
+        }
+      })
 
-        response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData,
-        })
-      }
+      // Add files
+      uploadedFiles.forEach((file, index) => {
+        formData.append(`file_${index}`, file)
+      })
+
+      const response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      })
 
       const data = await response.json()
 
       if (response.ok) {
-        setMessage('Analysis started! Check back in a few moments for results.')
-        setAnalysisUrl('')
-        setUploadedFile(null)
+        setMessage('Brand/Product discovery started! Analysis will be available shortly.')
+        setBrandName('')
+        setProductName('')
+        setAnalysisUrls([''])
+        setUploadedFiles([])
         setShowAnalysisForm(false)
         fetchAnalyses(selectedWorkspace, token) // Refresh the list
       } else {
@@ -285,6 +331,25 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching ads:', error)
+    }
+  }
+
+  const fetchCharacterImages = async (workspaceId: string, token: string) => {
+    try {
+      const response = await fetch(`https://electron-backend.carlos-mdtz9.workers.dev/api/character-images?workspace_id=${workspaceId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCharacterImages(data.images || [])
+      } else {
+        console.error('Failed to fetch character images')
+      }
+    } catch (error) {
+      console.error('Error fetching character images:', error)
     }
   }
 
@@ -347,6 +412,73 @@ export default function Dashboard() {
       fetchAnalyses(workspaceId, token)
       fetchCharacters(workspaceId, token)
       fetchAds(workspaceId, token)
+      fetchCharacterImages(workspaceId, token)
+    }
+  }
+
+  const handleUploadImage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedWorkspace || !uploadedImage) return
+
+    setLoading(true)
+    setMessage('')
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const formData = new FormData()
+    formData.append('workspace_id', selectedWorkspace)
+    formData.append('image', uploadedImage)
+
+    try {
+      const response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/character-images', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage('Image uploaded successfully!')
+        setUploadedImage(null)
+        fetchCharacterImages(selectedWorkspace, token) // Refresh the list
+      } else {
+        setMessage(data.error || 'Failed to upload image')
+      }
+    } catch (error) {
+      setMessage('Network error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteAnalysis = async (analysisId: string) => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`https://electron-backend.carlos-mdtz9.workers.dev/api/analyses/${analysisId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        setMessage('Analysis deleted successfully!')
+        // Refresh analyses after deletion
+        if (selectedWorkspace) {
+          fetchAnalyses(selectedWorkspace, token)
+        }
+      } else {
+        const data = await response.json()
+        setMessage(data.error || 'Failed to delete analysis')
+      }
+    } catch (error) {
+      setMessage('Network error')
     }
   }
 
@@ -404,28 +536,188 @@ export default function Dashboard() {
           </p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Workspaces</h2>
-            <p className="text-gray-600 mb-4">Manage your marketing workspaces</p>
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-            >
-              {showCreateForm ? 'Cancel' : 'Create Workspace'}
-            </button>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-2xl font-semibold mb-4">Brand Discovery</h2>
+              <p className="text-gray-600 mb-4">Get comprehensive information about brands or products</p>
+              <button
+                onClick={() => setShowAnalysisForm(!showAnalysisForm)}
+                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
+              >
+                {showAnalysisForm ? 'Cancel' : 'Start Discovery'}
+              </button>
+            </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Brand Discovery</h2>
-            <p className="text-gray-600 mb-4">Analyze brands with AI</p>
-            <button
-              onClick={() => setShowAnalysisForm(!showAnalysisForm)}
-              className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
-            >
-              {showAnalysisForm ? 'Cancel' : 'Start Analysis'}
-            </button>
-          </div>
+            {showAnalysisForm && (
+              <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 className="text-xl font-semibold mb-4">Brand & Product Discovery</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Upload documents, add website links, and let AI analyze your brand or product comprehensively.
+                  Information will be stored and can be edited for future use.
+                </p>
+
+                <form onSubmit={handleStartAnalysis}>
+                  <div className="mb-6">
+                    <label htmlFor="workspaceSelect" className="block text-sm font-medium mb-1">
+                      Select Workspace
+                    </label>
+                    <select
+                      id="workspaceSelect"
+                      value={selectedWorkspace}
+                      onChange={(e) => handleWorkspaceSelect(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Choose a workspace...</option>
+                      {workspaces.map((workspace) => (
+                        <option key={workspace.id} value={workspace.id.toString()}>
+                          {workspace.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-3">
+                      Analysis Type
+                    </label>
+                    <div className="flex gap-6">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="brand"
+                          checked={analysisType === 'brand'}
+                          onChange={(e) => setAnalysisType(e.target.value as 'brand' | 'product')}
+                          className="mr-2"
+                        />
+                        <div>
+                          <span className="font-medium">Brand Analysis</span>
+                          <p className="text-xs text-gray-500">Analyze brand identity, values, target audience</p>
+                        </div>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="product"
+                          checked={analysisType === 'product'}
+                          onChange={(e) => setAnalysisType(e.target.value as 'brand' | 'product')}
+                          className="mr-2"
+                        />
+                        <div>
+                          <span className="font-medium">Product Analysis</span>
+                          <p className="text-xs text-gray-500">Analyze product features, benefits, positioning</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor={analysisType === 'brand' ? 'brandName' : 'productName'} className="block text-sm font-medium mb-1">
+                      {analysisType === 'brand' ? 'Brand Name' : 'Product Name'}
+                    </label>
+                    <input
+                      type="text"
+                      id={analysisType === 'brand' ? 'brandName' : 'productName'}
+                      value={analysisType === 'brand' ? brandName : productName}
+                      onChange={(e) => analysisType === 'brand' ? setBrandName(e.target.value) : setProductName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder={analysisType === 'brand' ? 'Enter brand name' : 'Enter product name'}
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="block text-sm font-medium">
+                        Website Links
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setAnalysisUrls([...analysisUrls, ''])}
+                        className="text-green-600 hover:text-green-700 text-sm font-medium"
+                      >
+                        + Add Link
+                      </button>
+                    </div>
+                    {analysisUrls.map((url, index) => (
+                      <div key={index} className="flex gap-2 mb-2">
+                        <input
+                          type="url"
+                          value={url}
+                          onChange={(e) => {
+                            const newUrls = [...analysisUrls]
+                            newUrls[index] = e.target.value
+                            setAnalysisUrls(newUrls)
+                          }}
+                          placeholder="https://example.com"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setAnalysisUrls(analysisUrls.filter((_, i) => i !== index))}
+                          className="px-3 py-2 text-red-600 hover:text-red-700"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {analysisUrls.length === 0 && (
+                      <p className="text-sm text-gray-500 italic">No links added yet</p>
+                    )}
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="fileUpload" className="block text-sm font-medium mb-1">
+                      Upload Documents
+                    </label>
+                    <input
+                      type="file"
+                      id="fileUpload"
+                      multiple
+                      accept=".pdf,.docx,.txt,.md,.pptx,.xlsx"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || [])
+                        setUploadedFiles([...uploadedFiles, ...files])
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supported formats: PDF, DOCX, TXT, MD, PPTX, XLSX (max 10MB each)
+                    </p>
+
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-sm font-medium mb-2">Uploaded Files:</p>
+                        <div className="space-y-1">
+                          {uploadedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
+                              <span className="text-sm">{file.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))}
+                                className="text-red-600 hover:text-red-700 ml-2"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !selectedWorkspace || (!brandName && !productName) || (analysisUrls.length === 0 && uploadedFiles.length === 0)}
+                    className="bg-green-500 text-white py-2 px-6 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                  >
+                    {loading ? 'Analyzing...' : `Analyze ${analysisType === 'brand' ? 'Brand' : 'Product'}`}
+                  </button>
+                </form>
+              </div>
+            )}
+          </>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Brand Voice</h2>
@@ -439,7 +731,7 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Ad Creation</h2>
+            <h2 className="text-2xl font-semibold mb-4">Brand Ads</h2>
             <p className="text-gray-600 mb-4">Generate ads using AI characters</p>
             <button
               onClick={() => setShowAdForm(!showAdForm)}
@@ -479,115 +771,13 @@ export default function Dashboard() {
           </div>
         )}
 
-        {showAnalysisForm && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h3 className="text-xl font-semibold mb-4">Start Brand Analysis</h3>
-            <form onSubmit={handleStartAnalysis}>
-              <div className="mb-4">
-                <label htmlFor="workspaceSelect" className="block text-sm font-medium mb-1">
-                  Select Workspace
-                </label>
-                <select
-                  id="workspaceSelect"
-                  value={selectedWorkspace}
-                  onChange={(e) => handleWorkspaceSelect(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">Choose a workspace...</option>
-                  {workspaces.map((workspace) => (
-                    <option key={workspace.id} value={workspace.id.toString()}>
-                      {workspace.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Analysis Type
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="url"
-                      checked={analysisType === 'url'}
-                      onChange={(e) => setAnalysisType(e.target.value as 'url' | 'file')}
-                      className="mr-2"
-                    />
-                    Website URL
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="file"
-                      checked={analysisType === 'file'}
-                      onChange={(e) => setAnalysisType(e.target.value as 'url' | 'file')}
-                      className="mr-2"
-                    />
-                    Upload Document
-                  </label>
-                </div>
-              </div>
-
-              {analysisType === 'url' ? (
-                <div className="mb-4">
-                  <label htmlFor="analysisUrl" className="block text-sm font-medium mb-1">
-                    Website URL
-                  </label>
-                  <input
-                    type="url"
-                    id="analysisUrl"
-                    value={analysisUrl}
-                    onChange={(e) => setAnalysisUrl(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="https://example.com"
-                  />
-                </div>
-              ) : (
-                <div className="mb-4">
-                  <label htmlFor="fileUpload" className="block text-sm font-medium mb-1">
-                    Upload Document
-                  </label>
-                  <input
-                    type="file"
-                    id="fileUpload"
-                    accept=".pdf,.docx,.txt,.md"
-                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Supported formats: PDF, DOCX, TXT, MD (max 10MB)
-                  </p>
-                  {uploadedFile && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Selected: {uploadedFile.name}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || !selectedWorkspace || (analysisType === 'url' && !analysisUrl.trim()) || (analysisType === 'file' && !uploadedFile)}
-                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
-              >
-                {loading ? 'Starting Analysis...' : 'Start Analysis'}
-              </button>
-            </form>
-          </div>
-        )}
-
         {showCharacterForm && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h3 className="text-xl font-semibold mb-4">Generate Brand Voice Characters</h3>
+            <h3 className="text-xl font-semibold mb-4">Create Brand Voice Characters</h3>
             <div className="mb-4">
               <p className="text-sm text-gray-600 mb-4">
-                This will generate 3 unique AI characters based on your brand analysis.
-                Make sure you have completed a brand analysis first for better results.
+                Upload images and generate AI characters based on your brand analysis.
+                Images will be associated with your characters for later use.
               </p>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">
@@ -605,6 +795,26 @@ export default function Dashboard() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="characterImageUpload" className="block text-sm font-medium mb-1">
+                  Upload Character Images (Optional)
+                </label>
+                <input
+                  type="file"
+                  id="characterImageUpload"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  onChange={(e) => setUploadedImage(e.target.files?.[0] || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Supported formats: JPEG, PNG, GIF, WebP (max 5MB each)
+                </p>
+                {uploadedImage && (
+                  <p className="text-sm text-green-600 mt-1">
+                    Selected: {uploadedImage.name} ({(uploadedImage.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
               </div>
               <button
                 onClick={handleGenerateCharacters}
@@ -704,37 +914,13 @@ export default function Dashboard() {
               {analyses.length === 0 ? (
                 <p className="text-gray-600">No analyses yet. Start your first analysis above!</p>
               ) : (
-                <div className="space-y-4">
+            <div className="space-y-6">
                   {analyses.map((analysis) => (
-                    <div key={analysis.id} className="border border-gray-200 rounded-md p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-lg font-medium">
-                          {analysis.analysis_type === 'file' ? analysis.file_name : analysis.url}
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded text-sm ${
-                            analysis.analysis_type === 'file' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                          }`}>
-                            {analysis.analysis_type === 'file' ? 'Document' : 'Website'}
-                          </span>
-                          <span className={`px-2 py-1 rounded text-sm ${
-                            analysis.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            analysis.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {analysis.status}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        Created: {new Date(analysis.created_at).toLocaleDateString()}
-                      </p>
-                      {analysis.ai_analysis && (
-                        <div className="bg-gray-50 p-3 rounded">
-                          <p className="text-sm">{analysis.ai_analysis}</p>
-                        </div>
-                      )}
-                    </div>
+                    <AnalysisResultCard
+                      key={analysis.id}
+                      analysis={analysis}
+                      onDelete={handleDeleteAnalysis}
+                    />
                   ))}
                 </div>
               )}
@@ -788,6 +974,34 @@ export default function Dashboard() {
                         {character.status === 'discarded' && (
                           <span className="text-red-600 text-sm">✗ Discarded</span>
                         )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+              <h3 className="text-xl font-semibold mb-4">Character Images</h3>
+              {characterImages.length === 0 ? (
+                <p className="text-gray-600">No images uploaded yet. Upload images above!</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {characterImages.map((image) => (
+                    <div key={image.id} className="border border-gray-200 rounded-md p-4">
+                      <div className="mb-2">
+                        <img
+                          src={`data:${image.file_type};base64,${image.file_data}`}
+                          alt={image.file_name}
+                          className="w-full h-32 object-cover rounded-md"
+                        />
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium truncate">{image.file_name}</p>
+                        <p className="text-xs">{(image.file_size / 1024).toFixed(1)} KB</p>
+                        <p className="text-xs">
+                          {image.character_id ? `Character ID: ${image.character_id}` : 'Unassigned'}
+                        </p>
                       </div>
                     </div>
                   ))}

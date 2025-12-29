@@ -1,4 +1,10 @@
+import fs from 'fs'
 import Link from 'next/link'
+import path from 'path'
+
+const counterPath = path.join(process.cwd(), '..', 'counter.json')
+const counterData = JSON.parse(fs.readFileSync(counterPath, 'utf8'))
+const iterations = counterData.iterations
 
 export default function Home() {
   return (
@@ -23,10 +29,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="relative flex place-items-center">
+      <div className="relative flex place-items-center flex-col">
         <h1 className="text-4xl font-bold">
           Electron - Marketing Tool
         </h1>
+        <p className="text-lg mt-2 text-gray-600 dark:text-gray-400">
+          Times we've iterated with AI: {iterations}
+        </p>
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">

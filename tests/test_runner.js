@@ -13,6 +13,10 @@ const { testWorkspaceManagement } = require('./test_workspaces');
 const { testBrandAnalysis } = require('./test_brand_analysis');
 const { testCharacterManagement } = require('./test_characters');
 const { testAdGeneration } = require('./test_ads');
+const { testCharacterImageManagement } = require('./test_character_images');
+const { testAnalysisDeletion } = require('./test_analysis_deletion');
+const { testFileAnalysis } = require('./test_file_analysis');
+const { testHealthEndpoint } = require('./test_health');
 
 /**
  * Test suite configuration
@@ -47,6 +51,30 @@ const TEST_SUITES = [
     description: 'AI-powered ad creation',
     testFunction: testAdGeneration,
     timeout: 120000, // 2 minutes for AI processing
+  },
+  {
+    name: 'Character Image Tests',
+    description: 'Character image upload and retrieval',
+    testFunction: testCharacterImageManagement,
+    timeout: 30000,
+  },
+  {
+    name: 'Analysis Deletion Tests',
+    description: 'Analysis deletion functionality',
+    testFunction: testAnalysisDeletion,
+    timeout: 120000, // 2 minutes for AI processing
+  },
+  {
+    name: 'File Analysis Tests',
+    description: 'File upload analysis functionality',
+    testFunction: testFileAnalysis,
+    timeout: 180000, // 3 minutes for AI processing
+  },
+  {
+    name: 'Health Endpoint Tests',
+    description: 'Basic health check and CORS functionality',
+    testFunction: testHealthEndpoint,
+    timeout: 10000, // 10 seconds
   },
 ];
 
