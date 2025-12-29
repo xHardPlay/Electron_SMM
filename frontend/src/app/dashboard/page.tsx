@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AnalysisResultCard from '../../components/AnalysisResultCard'
+import FileProcessor from '../../components/FileProcessor'
 
 interface Workspace {
   id: number
@@ -26,7 +27,7 @@ export default function Dashboard() {
   const [brandName, setBrandName] = useState('')
   const [productName, setProductName] = useState('')
   const [analysisUrls, setAnalysisUrls] = useState<string[]>([''])
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [processedFiles, setProcessedFiles] = useState<any[]>([])
   const [adType, setAdType] = useState<string>('linkedin_post')
   const [adTopic, setAdTopic] = useState('')
   const [adQuantity, setAdQuantity] = useState<number>(1)
@@ -305,7 +306,11 @@ export default function Dashboard() {
     const name = analysisType === 'brand' ? brandName : productName
     if (!name.trim()) return
 
-    if (analysisUrls.length === 0 && uploadedFiles.length === 0) {
+    // Check if there are any valid inputs (non-empty URLs or successfully processed files)
+    const hasValidUrls = analysisUrls.some(url => url.trim() !== '')
+    const hasValidFiles = processedFiles.some(file => !file.error && file.content && file.content.trim() !== '')
+
+    if (!hasValidUrls && !hasValidFiles) {
       setMessage('Please add at least one URL or upload a file')
       return
     }
@@ -329,9 +334,12 @@ export default function Dashboard() {
         }
       })
 
-      // Add files
-      uploadedFiles.forEach((file, index) => {
-        formData.append(`file_${index}`, file)
+      // Add processed file content as text
+      processedFiles.forEach((processedFile, index) => {
+        if (!processedFile.error) {
+          formData.append(`file_content_${index}`, processedFile.content)
+          formData.append(`file_name_${index}`, processedFile.file.name)
+        }
       })
 
       const response = await fetch('https://electron-backend.carlos-mdtz9.workers.dev/api/analyses', {
@@ -349,7 +357,7 @@ export default function Dashboard() {
         setBrandName('')
         setProductName('')
         setAnalysisUrls([''])
-        setUploadedFiles([])
+        setProcessedFiles([])
         setShowAnalysisForm(false)
         fetchAnalyses(selectedWorkspace, token) // Refresh the list
       } else {
@@ -761,49 +769,15 @@ export default function Dashboard() {
                     )}
                   </div>
 
-                  <div className="mb-6">
-                    <label htmlFor="fileUpload" className="block text-sm font-medium mb-1">
-                      Upload Documents
-                    </label>
-                    <input
-                      type="file"
-                      id="fileUpload"
-                      multiple
-                      accept=".pdf,.docx,.txt,.md,.pptx,.xlsx"
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || [])
-                        setUploadedFiles([...uploadedFiles, ...files])
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Supported formats: PDF, DOCX, TXT, MD, PPTX, XLSX (max 10MB each)
-                    </p>
-
-                    {uploadedFiles.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-sm font-medium mb-2">Uploaded Files:</p>
-                        <div className="space-y-1">
-                          {uploadedFiles.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
-                              <span className="text-sm">{file.name}</span>
-                              <button
-                                type="button"
-                                onClick={() => setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))}
-                                className="text-red-600 hover:text-red-700 ml-2"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <FileProcessor
+                    onFilesProcessed={setProcessedFiles}
+                    maxFiles={5}
+                    maxFileSize={10}
+                  />
 
                   <button
                     type="submit"
-                    disabled={loading || !selectedWorkspace || (!brandName && !productName) || (analysisUrls.length === 0 && uploadedFiles.length === 0)}
+                    disabled={loading || !selectedWorkspace || (!brandName && !productName)}
                     className="bg-green-500 text-white py-2 px-6 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                   >
                     {loading ? 'Analyzing...' : `Analyze ${analysisType === 'brand' ? 'Brand' : 'Product'}`}
