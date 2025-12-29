@@ -1,0 +1,27 @@
+{
+  "name": "electron-tests",
+  "version": "1.0.0",
+  "description": "Test suite for Electron Marketing Tool",
+  "main": "test_runner.js",
+  "scripts": {
+    "test": "node test_runner.js",
+    "test:auth": "node test_runner.js auth",
+    "test:workspaces": "node test_runner.js workspace",
+    "test:analysis": "node test_runner.js analysis",
+    "test:characters": "node test_runner.js character",
+    "test:ads": "node test_runner.js ad",
+    "test:help": "node test_runner.js --help"
+  },
+  "keywords": [
+    "testing",
+    "automation",
+    "api-testing",
+    "electron"
+  ],
+  "author": "Electron Team",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

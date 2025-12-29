@@ -1,0 +1,15 @@
+/backend/.wrangler
+/backend/node_modules
+/.vscode
+/backup
+/backup
+/backup
+.prettierrc
+backend/package-lock.json
+/backend
+/backup
+/backup
+/backup
+/backup
+/frontend/.next
+/frontend/node_modules

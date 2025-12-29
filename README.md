@@ -1,347 +1,471 @@
-# PopKornMachine - AI-Powered Marketing Automation
+# Electron - AI-Powered Marketing Tool
 
-## 🤖 AI-Friendly Architecture
+A comprehensive marketing automation platform built with CloudFlare's serverless stack, featuring AI-driven brand analysis, character-based content generation, and multi-format ad creation.
 
-This project is designed to be **AI-friendly** with isolated, modular components that are easy to understand, modify, and extend. Each component has clear responsibilities and can be adjusted independently.
+## 🚀 Live Demo
 
-## 📁 Project Structure
+- **Frontend**: https://electron-frontend.pages.dev
+- **Backend API**: https://electron-backend.carlos-mdtz9.workers.dev
 
+## 📋 Features
+
+### Phase 1: User Management & Workspaces
+- Secure user registration and authentication
+- JWT token-based sessions
+- Multi-workspace support for organization
+
+### Phase 2: Brand Discovery
+- URL-based website analysis
+- AI-powered brand intelligence extraction
+- Real-time analysis status tracking
+
+### Phase 3: Brand Voice System
+- AI-generated brand characters with unique personalities
+- Character approval/rejection workflow
+- Personality trait storage and management
+
+### Phase 4: Ad Creation
+- Multi-format content generation (LinkedIn, Twitter, Email)
+- Character-based writing with consistent voice
+- Bulk content creation with quantity controls
+
+## 🏗 Architecture
+
+### Technology Stack
+- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- **Backend**: CloudFlare Workers (serverless functions)
+- **Database**: CloudFlare D1 (SQLite-compatible)
+- **AI**: CloudFlare Workers AI (Llama-3.1-8B model)
+- **Deployment**: CloudFlare Pages + Workers
+
+### Project Structure
 ```
-PopKornMachine/
-├── config/                 # 🔧 Configuration files (AI prompts, models, settings)
-│   ├── prompts.json        # AI agent prompts (easily editable)
-│   └── models.json         # Available AI models and settings
-├── functions/              # ⚡ Cloudflare Functions (serverless APIs)
-│   ├── api/
-│   │   ├── workflow/       # 🏭 Main workflow APIs
-│   │   │   ├── scrape.ts           # 🌐 Website scraping & brand extraction
-│   │   │   └── content-bulk-generate.ts  # 📝 Bulk content generation
-│   │   └── consulting/     # 💼 Consulting services
-│   │       └── analyze.ts          # 📊 Brand analysis & SWOT
-│   └── _middleware.ts      # 🔌 Middleware (if needed)
-├── pages/                  # 🎨 Frontend (Cloudflare Pages)
-│   ├── index.html          # 🏠 Landing page
-│   ├── workflow.html       # 🚀 Main 5-phase workflow
-│   ├── campaign.html       # 📢 Quick campaign creation
-│   └── consulting.html     # 💡 Brand consulting
-├── src/                    # 📚 Shared utilities (if needed)
-├── types/                  # 📋 TypeScript definitions
-├── docs/                   # 📖 Documentation
-└── tests/                  # 🧪 Test files
-```
-
-## 🎯 Core Principles
-
-### **1. Isolated Components**
-Each AI agent, API endpoint, and UI component is **self-contained** and can be modified independently.
-
-### **2. Configuration-Driven**
-All prompts, models, and settings are in **JSON files** that can be edited without touching code.
-
-### **3. Clear Naming & Documentation**
-Every file, function, and variable has **descriptive names** and comprehensive comments.
-
-### **4. Modular AI Agents**
-Each AI capability is a separate **agent** with its own prompt, model, and configuration.
-
-## 🌐 Live Demo
-
-**Professional Landing Page (Dark Theme)**: https://71ce4d0e.popkornmachine.pages.dev
-
-**Full Workflow Demo**: https://71ce4d0e.popkornmachine.pages.dev/workflow
-
-## 🚀 Quick Start
-
-### **1. Install Dependencies**
-```bash
-npm install
+electron/
+├── frontend/                 # Next.js application
+│   ├── src/app/             # App router pages
+│   ├── package.json
+│   └── next.config.js
+├── backend/                 # CloudFlare Workers
+│   ├── src/index.ts         # Main worker handler
+│   ├── wrangler.toml        # Worker configuration
+│   ├── package.json
+│   └── schema.sql           # Database schema
+└── docs/                   # Documentation
+    ├── tasks.md            # Development tasks
+    └── changelog.md        # Change history
 ```
 
-### **2. Configure AI Prompts**
-Edit `config/prompts.json` to customize AI behavior:
-```json
-{
-  "agents": {
-    "website_scraper": {
-      "name": "Website Content Scraper",
-      "model": "@cf/meta/llama-3.1-8b-instruct",
-      "prompt": "Your custom prompt here...",
-      "max_tokens": 1000
-    }
-  }
-}
+### Database Schema
+
+#### Users Table
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-### **3. Local Development**
-```bash
-npx wrangler pages dev
-```
-Visit: `http://127.0.0.1:8788`
-
-### **4. Deploy to Production**
-```bash
-npx wrangler pages deploy
-```
-
-### **5. Automated Deployment (GitHub Actions)**
-For automatic deployment on every push to main/master branch:
-1. Set up the required secrets in your GitHub repository (see `.github/README.md`)
-2. Push to main branch - deployment happens automatically
-3. Monitor deployment status in GitHub Actions tab
-
-## 🎭 AI Agents (Easily Customizable)
-
-### **1. Website Scraper** (`config/prompts.json` → `website_scraper`)
-- **Purpose**: Extract brand information from websites
-- **Input**: URLs to analyze
-- **Output**: Brand profile, personality, target audience
-- **Customization**: Edit the prompt to focus on different aspects
-
-### **2. Brand Voice Generator** (`config/prompts.json` → `brand_voice_generator`)
-- **Purpose**: Create comprehensive brand voice guidelines
-- **Input**: Scraped brand data + SWOT analysis
-- **Output**: Communication guidelines, tone, personality
-- **Customization**: Adjust for different brand voice frameworks
-
-### **3. Content Creator** (`config/prompts.json` → `content_creator`)
-- **Purpose**: Generate social media posts in bulk
-- **Input**: Brand voice + platform + category
-- **Output**: Platform-optimized posts with hashtags
-- **Customization**: Change posting style, tone, or format
-
-### **4. SWOT Analyzer** (`config/prompts.json` → `swot_analyzer`)
-- **Purpose**: Create structured business analysis
-- **Input**: Website analysis data
-- **Output**: Strengths, weaknesses, opportunities, threats
-- **Customization**: Modify analysis depth or focus areas
-
-## 🔧 Configuration Files
-
-### **`config/prompts.json`** - AI Behavior
-```json
-{
-  "models": {
-    "available": ["@cf/meta/llama-3.1-8b-instruct", "@cf/stabilityai/stable-diffusion-xl-base-1.0"],
-    "text_generation": "@cf/meta/llama-3.1-8b-instruct",
-    "image_generation": "@cf/stabilityai/stable-diffusion-xl-base-1.0"
-  },
-  "agents": {
-    "website_scraper": {
-      "name": "Website Content Scraper",
-      "model": "@cf/meta/llama-3.1-8b-instruct",
-      "max_tokens": 1000,
-      "temperature": 0.7,
-      "prompt": "Your custom scraping prompt..."
-    }
-  }
-}
+#### Workspaces Table
+```sql
+CREATE TABLE workspaces (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 ```
 
-### **`wrangler.toml`** - Cloudflare Configuration
-```toml
-name = "popkornmachine"
-compatibility_date = "2024-01-01"
-
-# AI bindings
-[ai]
-binding = "AI"
-
-# Storage (configure in Cloudflare dashboard)
-# [[kv_namespaces]]
-# binding = "METADATA"
-# id = "your-kv-namespace-id"
-
-# [[r2_buckets]]
-# binding = "IMAGES"
-# bucket_name = "popkornmachine-images"
+#### Brand Analyses Table
+```sql
+CREATE TABLE brand_analyses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workspace_id INTEGER NOT NULL,
+    url TEXT,
+    analysis_type TEXT NOT NULL,
+    content TEXT,
+    ai_analysis TEXT,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+);
 ```
 
-## 🎨 Frontend Components
-
-### **Workflow Pages** (`pages/*.html`)
-- **Modular Design**: Each phase is a separate section
-- **Progressive Enhancement**: Works without JavaScript
-- **Accessible**: Semantic HTML with proper ARIA labels
-- **Responsive**: Mobile-first design with Tailwind CSS
-
-### **API Integration**
-- **RESTful Endpoints**: Clean, predictable APIs
-- **Error Handling**: Comprehensive error responses
-- **Progress Indicators**: Real-time status updates
-
-## ⚙️ Backend Architecture
-
-### **Function Structure**
-```typescript
-// functions/api/workflow/scrape.ts
-interface Env {
-  AI: any;
-  METADATA?: any; // Optional for local development
-}
-
-export const onRequestPost = async (context: any) => {
-  // 1. Input validation
-  // 2. Business logic
-  // 3. AI processing
-  // 4. Response formatting
-};
+#### Characters Table
+```sql
+CREATE TABLE characters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workspace_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    personality TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+);
 ```
 
-### **Error Handling**
-- **Graceful Degradation**: Functions work without optional bindings
-- **Detailed Logging**: Console logs for debugging
-- **User-Friendly Messages**: Clear error responses
-
-## 🧪 Testing & Development
-
-### **Local Testing**
-```bash
-# Start development server
-npx wrangler pages dev
-
-# Test specific endpoints
-curl -X POST http://localhost:8788/api/workflow/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"urls": ["https://example.com"]}'
+#### Ads Table
+```sql
+CREATE TABLE ads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workspace_id INTEGER NOT NULL,
+    character_id INTEGER NOT NULL,
+    ad_type TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+);
 ```
 
-### **AI Prompt Testing**
-1. Edit `config/prompts.json`
-2. Test with small inputs (5 posts instead of 100)
-3. Check console logs for parsing success
-4. Adjust prompts based on results
+## 🔧 Setup & Development
 
-## 📖 API Documentation
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- CloudFlare account with Wrangler CLI
+- Git
 
-### **Workflow Endpoints**
+### Local Development
 
-#### **POST `/api/workflow/scrape`**
-Scrape websites and extract brand data.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd electron
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Frontend
+   cd frontend
+   npm install
+
+   # Backend
+   cd ../backend
+   npm install
+   ```
+
+3. **Configure CloudFlare**
+   ```bash
+   # Login to CloudFlare
+   npx wrangler auth login
+
+   # Create D1 database (if not exists)
+   npx wrangler d1 create electron-db
+   ```
+
+4. **Environment Setup**
+   Update `backend/wrangler.toml` with your database ID:
+   ```toml
+   [[d1_databases]]
+   binding = "DB"
+   database_name = "electron-db"
+   database_id = "your-database-id"
+   ```
+
+5. **Run locally**
+   ```bash
+   # Backend
+   cd backend
+   npm run dev
+
+   # Frontend (new terminal)
+   cd frontend
+   npm run dev
+   ```
+
+### Deployment
+
+1. **Deploy Backend**
+   ```bash
+   cd backend
+   npm run deploy
+   ```
+
+2. **Deploy Frontend**
+   ```bash
+   cd frontend
+   npm run build
+   npx wrangler pages deploy out --project-name electron-frontend
+   ```
+
+## 📚 Documentation
+
+### System Guide
+For a comprehensive understanding of the Electron system, read the **[Complete System Guide](docs/SYSTEM_GUIDE.md)** which covers:
+- User journey and technical workflows
+- Deep architectural analysis
+- Data flow patterns and state management
+- Testing strategies and infrastructure
+- Maintenance and extension guides
+- Scaling strategies and troubleshooting
+
+### API Reference
+Complete API documentation available in **[API_REFERENCE.md](docs/API_REFERENCE.md)**
+
+### Architecture Deep Dive
+Technical architecture details in **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**
+
+### Testing Guide
+Complete testing instructions in **[TESTING_GUIDE.md](docs/TESTING_GUIDE.md)**
+
+## 📚 API Endpoints
+
+### Authentication Endpoints
+
+#### POST /api/register
+Register a new user account.
 
 **Request:**
 ```json
 {
-  "urls": ["https://example.com", "https://example2.com"],
-  "industry": "Technology"
+  "email": "user@example.com",
+  "password": "securepassword"
 }
 ```
 
 **Response:**
 ```json
 {
-  "id": "scrape_123",
-  "brandName": "Example Corp",
-  "description": "Tech company...",
-  "aiInsights": {
-    "personality": ["Innovative", "Professional"],
-    "values": ["Quality", "Innovation"],
-    "positioning": "Market leader"
-  }
+  "message": "User registered successfully",
+  "userId": 1
 }
 ```
 
-#### **POST `/api/workflow/content-bulk-generate`**
-Generate posts in bulk.
+#### POST /api/login
+Authenticate and receive JWT token.
 
 **Request:**
 ```json
 {
-  "brandVoice": "Professional, innovative tech company...",
-  "categories": ["educational", "promotional"],
-  "platforms": ["instagram", "linkedin"],
-  "count": 5,
-  "goals": ["engagement"]
+  "email": "user@example.com",
+  "password": "securepassword"
 }
 ```
 
-## 🔧 Customization Guide
-
-### **1. Change AI Models**
-Edit `config/prompts.json`:
+**Response:**
 ```json
 {
-  "models": {
-    "text_generation": "@cf/meta/llama-3.2-3b-instruct"
-  }
+  "token": "jwt-token-here",
+  "userId": 1
 }
 ```
 
-### **2. Modify Prompts**
-Update any agent's prompt in `config/prompts.json`:
+### Workspace Endpoints
+
+#### GET /api/workspaces
+Get all workspaces for authenticated user.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Response:**
 ```json
 {
-  "agents": {
-    "content_creator": {
-      "prompt": "Your custom content generation prompt..."
+  "workspaces": [
+    {
+      "id": 1,
+      "name": "My Brand",
+      "created_at": "2025-01-01T00:00:00Z"
     }
-  }
+  ]
 }
 ```
 
-### **3. Add New Agents**
-1. Add to `config/prompts.json`
-2. Create new function in `functions/api/`
-3. Update frontend to call new endpoint
+#### POST /api/workspaces
+Create a new workspace.
 
-### **4. Change UI Styling**
-- Edit Tailwind classes in HTML files
-- Modify CSS in `<style>` sections
-- Update color scheme variables
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
 
-## 🚨 Troubleshooting
+**Request:**
+```json
+{
+  "name": "New Workspace"
+}
+```
 
-### **Common Issues**
+### Brand Analysis Endpoints
 
-#### **"AI parsing failed"**
-- Check `config/prompts.json` for correct prompt format
-- Verify AI model is available
-- Review console logs for parsing errors
+#### GET /api/analyses?workspace_id={id}
+Get brand analyses for a workspace.
 
-#### **"Template content appearing"**
-- AI generation failed, falling back to templates
-- Check network connectivity
-- Verify AI bindings in `wrangler.toml`
+#### POST /api/analyses
+Start brand analysis.
 
-#### **"KV/R2 binding errors"**
-- Comment out bindings in `wrangler.toml` for local development
-- Create resources in Cloudflare dashboard for production
+**Request:**
+```json
+{
+  "workspace_id": 1,
+  "url": "https://example.com",
+  "analysis_type": "url"
+}
+```
 
-## 📈 Performance & Costs
+### Character Endpoints
 
-### **Token Usage Estimates**
-- **Website Scraping**: ~800 tokens per URL
-- **Brand Voice Generation**: ~1200 tokens
-- **Content Generation**: ~1500 tokens per 10 posts
-- **SWOT Analysis**: ~1000 tokens
+#### GET /api/characters?workspace_id={id}
+Get characters for a workspace.
 
-### **Optimization Tips**
-- Use smaller batches for testing (5 posts)
-- Cache AI responses in KV store
-- Monitor usage in Cloudflare dashboard
+#### POST /api/characters
+Generate brand voice characters.
 
-## 🤝 Contributing
+**Request:**
+```json
+{
+  "workspace_id": 1,
+  "brand_analysis": "analysis-id"
+}
+```
 
-### **For AI Assistants**
-1. **Read this README** first - understand the architecture
-2. **Check `config/prompts.json`** for prompt customization
-3. **Look at existing functions** for code patterns
-4. **Test locally** before making changes
-5. **Update documentation** when adding features
+#### PUT /api/characters/{id}
+Update character status.
 
-### **Code Standards**
-- **TypeScript**: Strict type checking enabled
-- **Error Handling**: Comprehensive try/catch blocks
-- **Logging**: Console logs for debugging
-- **Comments**: Explain complex logic
+**Request:**
+```json
+{
+  "status": "approved"
+}
+```
 
-## 📚 Resources
+### Ad Generation Endpoints
 
-- [Cloudflare AI Documentation](https://developers.cloudflare.com/workers-ai/)
-- [Wrangler CLI Guide](https://developers.cloudflare.com/workers/wrangler/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+#### GET /api/ads?workspace_id={id}
+Get generated ads for a workspace.
 
----
+#### POST /api/ads
+Generate ads using approved characters.
 
-**Built for AI agents, by AI agents** 🤖✨
+**Request:**
+```json
+{
+  "workspace_id": 1,
+  "character_ids": [1, 2],
+  "ad_type": "linkedin_post",
+  "topic": "Product Launch",
+  "quantity": 3
+}
+```
 
-This project is designed to be **AI-maintainable** with clear structure, comprehensive documentation, and modular components that any AI assistant can understand and modify.
+## 🤖 AI Integration
+
+### CloudFlare Workers AI
+
+The application uses CloudFlare's Workers AI service with the Llama-3.1-8B model for:
+
+1. **Brand Analysis**: Extract insights from website content
+2. **Character Generation**: Create brand voice personalities
+3. **Content Creation**: Generate ads matching character personalities
+
+### AI Prompts
+
+The system uses structured prompts to ensure consistent, high-quality AI outputs:
+
+- **Analysis**: Marketing-focused content analysis
+- **Characters**: Personality-driven brand voice creation
+- **Ads**: Format-specific content generation with character consistency
+
+## 🔒 Security
+
+- JWT token-based authentication
+- Password hashing with SHA-256
+- CORS protection
+- Input validation and sanitization
+- User data isolation by workspace
+
+## 📈 Performance
+
+- Serverless architecture with global CDN
+- Asynchronous AI processing
+- Optimized database queries
+- Static frontend deployment
+- Lazy loading and code splitting
+
+## 🚀 Scaling
+
+The architecture is designed for horizontal scaling:
+
+- **Workers**: Auto-scale based on demand
+- **D1**: Distributed SQLite with global replication
+- **Pages**: Global CDN with edge computing
+- **AI**: On-demand processing without resource limits
+
+## 🧪 Testing
+
+The project includes a comprehensive automated test suite that validates all features end-to-end.
+
+### Running Tests
+
+```bash
+# Run all tests
+cd tests
+npm test
+
+# Run specific test suites
+npm run test:auth        # Authentication tests
+npm run test:workspaces  # Workspace management tests
+npm run test:analysis    # Brand analysis tests
+npm run test:characters  # Character generation tests
+npm run test:ads         # Ad creation tests
+
+# Show help
+npm run test:help
+```
+
+### Test Structure
+
+```
+tests/
+├── test_runner.js       # Main orchestrator
+├── test_utils.js        # Shared utilities
+├── test_auth.js         # User registration & login
+├── test_workspaces.js   # Workspace CRUD operations
+├── test_brand_analysis.js # URL analysis & AI processing
+├── test_characters.js   # Character generation & management
+├── test_ads.js          # Ad creation with characters
+└── package.json         # Test scripts
+```
+
+### Test Features
+
+- **End-to-End Testing**: Tests actual API endpoints with real data
+- **Automated Cleanup**: Test users and data are automatically removed
+- **Async Operation Handling**: Properly waits for AI processing completion
+- **Comprehensive Coverage**: Tests all major user workflows
+- **Detailed Reporting**: Clear pass/fail results with error details
+- **Timeout Protection**: Prevents tests from hanging indefinitely
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes with proper documentation
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Check the [Issues](https://github.com/your-repo/issues) page
+- Review the [API Documentation](#api-documentation)
+- Check [CloudFlare Workers Docs](https://developers.cloudflare.com/workers/)
+
+## 🎯 Roadmap
+
+- [ ] PDF file upload and analysis
+- [ ] Additional AI models integration
+- [ ] Social media scheduling
+- [ ] Analytics and reporting
+- [ ] Team collaboration features
+- [ ] Custom character training

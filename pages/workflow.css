@@ -1,6 +1,0 @@
-/* Workflow-specific styles for step indicators and animations */
-.step-active { background-color: #3b82f6; color: white; }
-.step-completed { background-color: #10b981; color: white; }
-.step-inactive { background-color: #e5e7eb; color: #6b7280; }
-.fade-in { animation: fadeIn 0.5s ease-in; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
