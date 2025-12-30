@@ -1,10 +1,4 @@
-import fs from 'fs'
 import Link from 'next/link'
-import path from 'path'
-
-const counterPath = path.join(process.cwd(), '..', 'counter.json')
-const counterData = JSON.parse(fs.readFileSync(counterPath, 'utf8'))
-const iterations = counterData.iterations
 
 export default function Home() {
   return (
@@ -13,29 +7,37 @@ export default function Home() {
         <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-in-200/30 lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Welcome to AgencySMM
         </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
+      </div>
+
+      <div className="relative flex place-items-center flex-col">
+        <Link
+          href="https://clearfuturecs.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="https://assets.cdn.filesafe.space/jOHIRKxHby1MsnSq2OwP/media/688cc5a00b03e1cc23405f1b.svg"
+            alt="Company Logo"
+            className="w-32 h-32 mb-4 border-2 border-black ring-2 ring-red-500 cursor-pointer hover:opacity-80 transition-opacity"
+          />
+        </Link>
+        <h1 className="text-4xl font-bold mb-8">
+          AgencySMM - Marketing Tool
+        </h1>
+        <div className="flex gap-4">
           <Link
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             href="/register"
           >
             Register →
           </Link>
           <Link
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             href="/login"
           >
             Login →
           </Link>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center flex-col">
-        <h1 className="text-4xl font-bold">
-          AgencySMM - Marketing Tool
-        </h1>
-        <p className="text-lg mt-2 text-gray-600 dark:text-gray-400">
-          Times we've iterated with AI: {iterations}
-        </p>
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">

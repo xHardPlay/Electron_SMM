@@ -625,6 +625,83 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                 </div>
               </div>
 
+              {/* Brand Contacts Section */}
+              {brandProfile.brand_contacts && brandProfile.brand_contacts.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">Brand Contacts</h3>
+                        <p className="text-cyan-100 text-sm">Key people and contact information</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {brandProfile.brand_contacts.map((contact: any, index: number) => (
+                        <div key={index} className="bg-gradient-to-br from-cyan-50 to-teal-50 rounded-lg p-4 border border-cyan-200">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-cyan-900 text-sm">{contact.name || 'N/A'}</h4>
+                              <p className="text-cyan-700 text-xs mb-2">{contact.role || 'N/A'}</p>
+
+                              <div className="space-y-1">
+                                {contact.email && (
+                                  <div className="flex items-center gap-2">
+                                    <svg className="w-3 h-3 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    <a href={`mailto:${contact.email}`} className="text-cyan-700 hover:text-cyan-900 text-xs truncate">
+                                      {contact.email}
+                                    </a>
+                                  </div>
+                                )}
+
+                                {contact.phone && (
+                                  <div className="flex items-center gap-2">
+                                    <svg className="w-3 h-3 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <a href={`tel:${contact.phone}`} className="text-cyan-700 hover:text-cyan-900 text-xs">
+                                      {contact.phone}
+                                    </a>
+                                  </div>
+                                )}
+
+                                {contact.website && (
+                                  <div className="flex items-center gap-2">
+                                    <svg className="w-3 h-3 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    <a href={contact.website.startsWith('http') ? contact.website : `https://${contact.website}`}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="text-cyan-700 hover:text-cyan-900 text-xs truncate">
+                                      {contact.website}
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Brand Voice Guide */}
               {brandProfile.brand_voice_guide && (
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
