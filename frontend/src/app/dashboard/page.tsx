@@ -337,6 +337,7 @@ export default function Dashboard() {
                             key={analysis.id}
                             analysis={analysis}
                             onDelete={deleteAnalysis}
+                            onUpdate={() => fetchAnalyses(selectedWorkspace)}
                           />
                         ))}
                       </div>

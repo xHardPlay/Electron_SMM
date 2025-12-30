@@ -125,6 +125,29 @@ export const analysesApi = {
     }
   },
 
+  async updateAnalysis(token: string, analysisId: string, aiAnalysis: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(`${API_BASE}/analyses/${analysisId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ai_analysis: aiAnalysis }),
+      })
+
+      if (response.ok) {
+        return { success: true }
+      } else {
+        const data = await response.json()
+        return { success: false, error: data.error || 'Failed to update analysis' }
+      }
+    } catch (error) {
+      console.error('Error updating analysis:', error)
+      return { success: false, error: 'Network error' }
+    }
+  },
+
   async deleteAnalysis(token: string, analysisId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await fetch(`${API_BASE}/analyses/${analysisId}`, {

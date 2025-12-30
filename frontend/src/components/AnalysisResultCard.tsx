@@ -1,5 +1,9 @@
 'use client'
 
+import { useState } from 'react'
+import { useAuth } from '../hooks/useAuth'
+import { analysesApi } from '../services/api/analyses'
+
 interface Analysis {
   id: number
   name: string
@@ -15,9 +19,40 @@ interface Analysis {
 interface AnalysisResultCardProps {
   analysis: Analysis
   onDelete: (analysisId: string) => Promise<void>
+  onUpdate?: () => void
 }
 
-export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResultCardProps) {
+export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: AnalysisResultCardProps) {
+  const { token } = useAuth()
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedAnalysis, setEditedAnalysis] = useState(analysis.ai_analysis || '')
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async () => {
+    if (!token) return
+
+    setIsSaving(true)
+    try {
+      const result = await analysesApi.updateAnalysis(token, analysis.id.toString(), editedAnalysis)
+      if (result.success) {
+        setIsEditing(false)
+        onUpdate?.()
+      } else {
+        alert('Failed to save changes: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+      alert('Failed to save changes')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setEditedAnalysis(analysis.ai_analysis || '')
+    setIsEditing(false)
+  }
+
   // Parse and fix the AI analysis JSON response
   const parseAnalysisJSON = (text: string) => {
     console.log('🔍 PARSING ANALYSIS JSON - Starting parse process')
@@ -264,20 +299,32 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
           </div>
         </div>
         <div className="text-right flex flex-col items-end gap-2">
-          <button
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to delete the analysis "${analysis.name}"? This action cannot be undone.`)) {
-                onDelete(analysis.id.toString());
-              }
-            }}
-            className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
-            title="Delete this analysis"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Delete
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+              title="Edit analysis results"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              {isEditing ? 'Cancel Edit' : 'Edit'}
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to delete the analysis "${analysis.name}"? This action cannot be undone.`)) {
+                  onDelete(analysis.id.toString());
+                }
+              }}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+              title="Delete this analysis"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          </div>
           <div>
             <p className="text-sm text-gray-500">
               {new Date(analysis.created_at).toLocaleDateString('en-US', {
@@ -1093,10 +1140,54 @@ export default function AnalysisResultCard({ analysis, onDelete }: AnalysisResul
                   {analysis.ai_analysis}
                 </div>
               </details>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50">
-                <p className="text-sm text-gray-600 mb-2 italic">Last 500 characters (where error likely occurred):</p>
-                {analysis.ai_analysis?.substring(Math.max(0, (analysis.ai_analysis.length || 0) - 500)) || 'No response'}
-              </div>
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Edit Analysis Results
+                    </label>
+                    <textarea
+                      value={editedAnalysis}
+                      onChange={(e) => setEditedAnalysis(e.target.value)}
+                      className="w-full h-96 p-4 border border-gray-300 rounded-md font-mono text-sm resize-vertical"
+                      placeholder="Enter the analysis results..."
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white text-sm rounded-md transition-colors duration-200 flex items-center gap-2"
+                    >
+                      {isSaving ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                      className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white text-sm rounded-md transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm max-h-96 overflow-y-auto border border-gray-200 rounded-md p-4 bg-gray-50">
+                  <p className="text-sm text-gray-600 mb-2 italic">Last 500 characters (where error likely occurred):</p>
+                  {analysis.ai_analysis?.substring(Math.max(0, (analysis.ai_analysis.length || 0) - 500)) || 'No response'}
+                </div>
+              )}
             </div>
           )}
         </div>
