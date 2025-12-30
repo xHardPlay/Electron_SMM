@@ -8,6 +8,7 @@ import AnalysisResultCard from '../../components/AnalysisResultCard'
 import CharacterForm from '../../components/CharacterForm'
 import WorkspaceForm from '../../components/WorkspaceForm'
 import WorkspaceSidebar from '../../components/WorkspaceSidebar'
+import { useAdGenerations } from '../../hooks/useAdGenerations'
 import { useAds } from '../../hooks/useAds'
 import { useAnalyses } from '../../hooks/useAnalyses'
 import { useAuth } from '../../hooks/useAuth'
@@ -59,7 +60,16 @@ export default function Dashboard() {
   } = useCharacters(token, selectedWorkspace)
 
   const { ads, loading: adsLoading, message: adsMessage, fetchAds, generateAds, clearMessage: clearAdsMessage } = useAds(token, selectedWorkspace)
+  const { generations, fetchGenerations } = useAdGenerations(token, selectedWorkspace)
+
   const { characterImages, fetchCharacterImages } = useCharacterImages(token, selectedWorkspace)
+
+  // Refresh ads when generations complete
+  useEffect(() => {
+    if (generations.some(g => g.status === 'completed')) {
+      fetchAds(selectedWorkspace)
+    }
+  }, [generations, fetchAds, selectedWorkspace])
 
   // Initialize data on mount
   useEffect(() => {
@@ -97,8 +107,8 @@ export default function Dashboard() {
     )
   }
 
-  const handleGenerateAds = (adType: string, topic: string, quantity: number) => {
-    generateAds(selectedCharacters, adType, topic, quantity)
+  const handleGenerateAds = (adType: string, topic: string, quantity: number, contentMix?: { education: number; story: number; proof: number; promotion: number }) => {
+    generateAds(selectedCharacters, adType, topic, quantity, contentMix)
     // Switch to ads tab to show results
     setActiveResultsTab('ads')
   }
@@ -222,12 +232,11 @@ export default function Dashboard() {
                     <p className="text-gray-600 mb-4">Create AI brand characters</p>
                     <CharacterForm
                       workspaces={workspaces}
+                      analyses={analyses}
                       selectedWorkspace={selectedWorkspace}
                       onWorkspaceSelect={handleWorkspaceSelect}
-                      onGenerateCharacters={() => {
-                        // Use the most recent completed analysis as context if available
-                        const completedAnalysis = analyses.find(a => a.status === 'completed')
-                        generateCharacters(completedAnalysis ? completedAnalysis.id.toString() : undefined)
+                      onGenerateCharacters={(analysisId) => {
+                        generateCharacters(analysisId)
                       }}
                       onUploadImage={(image) => {
                         // TODO: Implement image upload
@@ -248,6 +257,7 @@ export default function Dashboard() {
                       onCharacterSelect={handleCharacterSelect}
                       onGenerateAds={handleGenerateAds}
                       loading={workspaceLoading || analysisLoading || adsLoading}
+                      adGenerations={generations}
                     />
                   </div>
                 )}
@@ -405,16 +415,35 @@ export default function Dashboard() {
                                 <h4 className="text-lg font-medium">{ad.topic}</h4>
                                 <p className="text-sm text-gray-600">{ad.character_name} • {ad.ad_type.replace('_', ' ')}</p>
                               </div>
-                              <span className="px-2 py-1 rounded text-sm bg-orange-100 text-orange-800">
-                                {ad.ad_type.replace('_', ' ')}
-                              </span>
+                              <div className="flex gap-2">
+                                <span className="px-2 py-1 rounded text-sm bg-orange-100 text-orange-800">
+                                  {ad.ad_type.replace('_', ' ')}
+                                </span>
+                                {ad.content_category && (
+                                  <span className={`px-2 py-1 rounded text-sm ${
+                                    ad.content_category === 'education' ? 'bg-blue-100 text-blue-800' :
+                                    ad.content_category === 'story' ? 'bg-green-100 text-green-800' :
+                                    ad.content_category === 'proof' ? 'bg-purple-100 text-purple-800' :
+                                    ad.content_category === 'promotion' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {ad.content_category}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <p className="text-sm text-gray-600 mb-2">
                               Created: {new Date(ad.created_at).toLocaleDateString()}
                             </p>
-                            <div className="bg-gray-50 p-3 rounded">
+                            <div className="bg-gray-50 p-3 rounded mb-3">
                               <p className="text-sm whitespace-pre-wrap">{ad.content}</p>
                             </div>
+                            {ad.image_prompt && (
+                              <div className="bg-blue-50 p-3 rounded">
+                                <p className="text-xs text-blue-600 font-medium mb-1">Image Prompt:</p>
+                                <p className="text-sm text-blue-800">{ad.image_prompt}</p>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

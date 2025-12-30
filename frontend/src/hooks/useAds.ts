@@ -21,14 +21,14 @@ export const useAds = (token: string | null, selectedWorkspace: string) => {
     }
   }, [token, selectedWorkspace])
 
-  const generateAds = useCallback(async (characterIds: number[], adType: string, topic: string, quantity: number) => {
+  const generateAds = useCallback(async (characterIds: number[], adType: string, topic: string, quantity: number, contentMix?: { education: number; story: number; proof: number; promotion: number }) => {
     if (!token || !selectedWorkspace) return
 
     setLoading(true)
     setMessage('')
 
     try {
-      await adsApi.generateAds(token, selectedWorkspace, characterIds, adType, topic, quantity)
+      await adsApi.generateAds(token, selectedWorkspace, characterIds, adType, topic, quantity, contentMix)
       setMessage('Ad generation started. Ads will be available shortly.')
       // Refresh ads after a delay to show new ones
       setTimeout(() => fetchAds(), 3000)

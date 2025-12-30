@@ -6,17 +6,26 @@ interface Workspace {
   created_at: string
 }
 
+interface Analysis {
+  id: number
+  name: string
+  status: string
+  created_at: string
+}
+
 interface CharacterFormProps {
   workspaces: Workspace[]
+  analyses: Analysis[]
   selectedWorkspace: string
   onWorkspaceSelect: (workspaceId: string) => void
-  onGenerateCharacters: () => void
+  onGenerateCharacters: (analysisId?: string) => void
   onUploadImage: (image: File) => void
   loading: boolean
 }
 
 export default function CharacterForm({
   workspaces,
+  analyses,
   selectedWorkspace,
   onWorkspaceSelect,
   onGenerateCharacters,
@@ -24,6 +33,7 @@ export default function CharacterForm({
   loading,
 }: CharacterFormProps) {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null)
+  const [selectedAnalysis, setSelectedAnalysis] = useState<string>('')
 
   const handleImageUpload = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +41,10 @@ export default function CharacterForm({
       onUploadImage(uploadedImage)
       setUploadedImage(null)
     }
+  }
+
+  const handleGenerateCharacters = () => {
+    onGenerateCharacters(selectedAnalysis || undefined)
   }
 
   return (
@@ -59,6 +73,28 @@ export default function CharacterForm({
           </select>
         </div>
         <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">
+            Brand Analysis for Character Generation (Optional)
+          </label>
+          <select
+            value={selectedAnalysis}
+            onChange={(e) => setSelectedAnalysis(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">Use generic characters (no analysis)</option>
+            {analyses
+              .filter(analysis => analysis.status === 'completed')
+              .map((analysis) => (
+                <option key={analysis.id} value={analysis.id.toString()}>
+                  {analysis.name} (Completed {new Date(analysis.created_at).toLocaleDateString()})
+                </option>
+              ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Select a completed brand analysis to generate characters that match your brand's personality and voice.
+          </p>
+        </div>
+        <div className="mb-4">
           <label htmlFor="characterImageUpload" className="block text-sm font-medium mb-1">
             Upload Character Images (Optional)
           </label>
@@ -80,7 +116,7 @@ export default function CharacterForm({
         </div>
         <div className="flex gap-4">
           <button
-            onClick={onGenerateCharacters}
+            onClick={handleGenerateCharacters}
             disabled={loading || !selectedWorkspace}
             className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
           >

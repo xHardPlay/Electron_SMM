@@ -13,6 +13,7 @@ const { testWorkspaceManagement } = require('./test_workspaces');
 const { testBrandAnalysis } = require('./test_brand_analysis');
 const { testCharacterManagement } = require('./test_characters');
 const { testAdGeneration } = require('./test_ads');
+const { testBrandContextAdGeneration } = require('./test_brand_context_ads');
 const { testCharacterImageManagement } = require('./test_character_images');
 const { testAnalysisDeletion } = require('./test_analysis_deletion');
 const { testFileAnalysis } = require('./test_file_analysis');
@@ -51,6 +52,12 @@ const TEST_SUITES = [
     description: 'AI-powered ad creation',
     testFunction: testAdGeneration,
     timeout: 120000, // 2 minutes for AI processing
+  },
+  {
+    name: 'Brand Context Ad Tests',
+    description: 'Ad generation with brand context from analysis',
+    testFunction: testBrandContextAdGeneration,
+    timeout: 180000, // 3 minutes for AI processing
   },
   {
     name: 'Character Image Tests',

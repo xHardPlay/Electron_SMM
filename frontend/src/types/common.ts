@@ -32,6 +32,8 @@ export interface Ad {
   character_name: string
   ad_type: string
   content: string
+  content_category?: string
+  image_prompt?: string
   created_at: string
 }
 

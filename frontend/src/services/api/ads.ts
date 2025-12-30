@@ -24,21 +24,48 @@ export const adsApi = {
     }
   },
 
-  async generateAds(token: string, workspaceId: string, characterIds: number[], adType: string, topic: string, quantity: number): Promise<any> {
+  async fetchAdGenerations(token: string, workspaceId: string): Promise<any[]> {
     try {
+      const response = await fetch(`${API_BASE}/ad-generations?workspace_id=${workspaceId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data.generations || []
+      } else {
+        console.error('Failed to fetch ad generations')
+        return []
+      }
+    } catch (error) {
+      console.error('Error fetching ad generations:', error)
+      throw error
+    }
+  },
+
+  async generateAds(token: string, workspaceId: string, characterIds: number[], adType: string, topic: string, quantity: number, contentMix?: { education: number; story: number; proof: number; promotion: number }): Promise<any> {
+    try {
+      const requestBody: any = {
+        workspace_id: parseInt(workspaceId),
+        character_ids: characterIds,
+        ad_type: adType,
+        topic,
+        quantity,
+      };
+
+      if (contentMix) {
+        requestBody.content_mix = contentMix;
+      }
+
       const response = await fetch(`${API_BASE}/ads/generate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          workspace_id: parseInt(workspaceId),
-          character_ids: characterIds,
-          ad_type: adType,
-          topic,
-          quantity,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       if (response.ok) {
