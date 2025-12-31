@@ -1,5 +1,7 @@
 'use client'
 
+import StatusBadge from './analysis/StatusBadge'
+
 interface CharacterDisplayProps {
   characters: any[]
   handleCharacterAction: (characterId: string, action: 'approved' | 'discarded') => void
@@ -17,13 +19,7 @@ export default function CharacterDisplay({ characters, handleCharacterAction }: 
             <div key={character.id} className="border border-gray-200 rounded-md p-4">
               <div className="flex justify-between items-start mb-2">
                 <h4 className="text-lg font-medium">{character.name}</h4>
-                <span className={`px-2 py-1 rounded text-sm ${
-                  character.status === 'approved' ? 'bg-green-100 text-green-800' :
-                  character.status === 'discarded' ? 'bg-red-100 text-red-800' :
-                  'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {character.status}
-                </span>
+                <StatusBadge status={character.status} />
               </div>
               <p className="text-sm text-gray-600 mb-3">{character.description}</p>
               {character.personality && (
@@ -32,6 +28,62 @@ export default function CharacterDisplay({ characters, handleCharacterAction }: 
                   <p className="text-sm bg-gray-50 p-2 rounded">{character.personality}</p>
                 </div>
               )}
+
+              {/* Processing Status */}
+              {character.status === 'processing' && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                    <div>
+                      <p className="text-purple-800 font-medium">🤖 AI Processing</p>
+                      <p className="text-purple-600 text-sm">Generating character details...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {character.status === 'generating' && (
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-pulse">
+                      <div className="w-5 h-5 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full"></div>
+                    </div>
+                    <div>
+                      <p className="text-orange-800 font-medium">🎨 Creating Character</p>
+                      <p className="text-orange-600 text-sm">Finalizing character profile...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {character.status === 'completed' && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <div>
+                      <p className="text-green-800 font-medium">✅ Character Ready</p>
+                      <p className="text-green-600 text-sm">Character generation completed!</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {character.status === 'failed' && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <p className="text-red-800 font-medium">❌ Generation Failed</p>
+                      <p className="text-red-600 text-sm">There was an error creating this character.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-2">
                 {character.status === 'pending' && (
                   <>
