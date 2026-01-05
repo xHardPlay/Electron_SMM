@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [selectedCharacters, setSelectedCharacters] = useState<number[]>([])
   const [activeFormTab, setActiveFormTab] = useState<'discovery' | 'voice' | 'adform'>('discovery')
   const [activeResultsTab, setActiveResultsTab] = useState<'analysis' | 'characters' | 'ads' | 'images'>('analysis')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Custom hooks for state management
   const { userId, token, isLoading, logout } = useAuth()
@@ -126,18 +127,45 @@ export default function Dashboard() {
 
   return (
     <main className="flex min-h-screen">
-      <WorkspaceSidebar
-        workspaces={workspaces}
-        selectedWorkspace={selectedWorkspace}
-        onWorkspaceSelect={handleWorkspaceSelect}
-        onDeleteWorkspace={deleteWorkspace}
-        onCreateWorkspace={() => setShowCreateForm(true)}
-      />
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 bg-gray-800 text-white p-2 rounded-md shadow-lg"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Sidebar */}
+      <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out`}>
+        <WorkspaceSidebar
+          workspaces={workspaces}
+          selectedWorkspace={selectedWorkspace}
+          onWorkspaceSelect={(workspaceId) => {
+            handleWorkspaceSelect(workspaceId)
+            setIsSidebarOpen(false) // Close sidebar on mobile after selection
+          }}
+          onDeleteWorkspace={deleteWorkspace}
+          onCreateWorkspace={() => {
+            setShowCreateForm(true)
+            setIsSidebarOpen(false) // Close sidebar on mobile
+          }}
+        />
+      </div>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Main content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 lg:p-8 lg:ml-0">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Dashboard</h1>
+          <h1 className="text-4xl font-bold  ml-12">Dashboard</h1>
           <button
             onClick={logout}
             className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
@@ -184,10 +212,10 @@ export default function Dashboard() {
             {/* Forms Section */}
             <div className="bg-white rounded-lg shadow-md">
               <div className="border-b border-gray-200">
-                <nav className="flex">
+                <nav className="flex overflow-x-auto scrollbar-hide">
                   <button
                     onClick={() => setActiveFormTab('discovery')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeFormTab === 'discovery'
                         ? 'border-teal-500 text-teal-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -197,7 +225,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => setActiveFormTab('voice')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeFormTab === 'voice'
                         ? 'border-indigo-500 text-indigo-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -207,7 +235,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => setActiveFormTab('adform')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeFormTab === 'adform'
                         ? 'border-pink-500 text-pink-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -276,10 +304,10 @@ export default function Dashboard() {
             {/* Results Section */}
             <div className="bg-white rounded-lg shadow-md">
               <div className="border-b border-gray-200">
-                <nav className="flex">
+                <nav className="flex overflow-x-auto scrollbar-hide">
                   <button
                     onClick={() => setActiveResultsTab('analysis')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeResultsTab === 'analysis'
                         ? 'border-green-500 text-green-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -289,7 +317,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => setActiveResultsTab('characters')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeResultsTab === 'characters'
                         ? 'border-purple-500 text-purple-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -299,7 +327,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => setActiveResultsTab('ads')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeResultsTab === 'ads'
                         ? 'border-orange-500 text-orange-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -309,7 +337,7 @@ export default function Dashboard() {
                   </button>
                   <button
                     onClick={() => setActiveResultsTab('images')}
-                    className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                    className={`px-4 lg:px-6 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                       activeResultsTab === 'images'
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

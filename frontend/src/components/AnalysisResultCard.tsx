@@ -118,15 +118,15 @@ export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: Ana
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">{analysis.name}</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{analysis.name}</h3>
             <div className="flex items-center gap-2 mt-1">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                 analysis.analysis_type === 'brand'
@@ -142,29 +142,30 @@ export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: Ana
             </div>
           </div>
         </div>
-        <div className="text-right flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col items-start sm:items-end gap-2 sm:text-right">
+          <div className="flex flex-wrap items-center gap-2">
             {brandProfile && !isInlineEditing && (
               <>
                 <button
                   onClick={handleInlineEdit}
-                  className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+                  className="px-2 sm:px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                   title="Edit individual fields"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  Edit Fields
+                  <span className="hidden sm:inline">Edit Fields</span>
+                  <span className="sm:hidden">Edit</span>
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+                  className="px-2 sm:px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                   title="Download analysis as JSON file"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download
+                  <span className="hidden sm:inline">Download</span>
                 </button>
               </>
             )}
@@ -172,35 +173,37 @@ export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: Ana
               <>
                 <button
                   onClick={handleSaveInlineEdits}
-                  className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+                  className="px-2 sm:px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                   title="Save field edits"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Save Edits
+                  <span className="hidden sm:inline">Save Edits</span>
+                  <span className="sm:hidden">Save</span>
                 </button>
                 <button
                   onClick={handleCancelInlineEdits}
-                  className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+                  className="px-2 sm:px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
                   title="Cancel field edits"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Cancel
+                  <span className="hidden sm:inline">Cancel</span>
                 </button>
               </>
             )}
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+              className="px-2 sm:px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
               title="Edit raw analysis data"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              {isEditing ? 'Cancel Raw Edit' : 'Edit Raw'}
+              <span className="hidden sm:inline">{isEditing ? 'Cancel Raw Edit' : 'Edit Raw'}</span>
+              <span className="sm:hidden">{isEditing ? 'Cancel' : 'Raw'}</span>
             </button>
             <button
               onClick={() => {
@@ -208,13 +211,13 @@ export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: Ana
                   onDelete(analysis.id.toString());
                 }
               }}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
+              className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded-md transition-colors duration-200 flex items-center gap-1"
               title="Delete this analysis"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              Delete
+              <span className="hidden sm:inline">Delete</span>
             </button>
           </div>
           <div>
@@ -268,22 +271,22 @@ export default function AnalysisResultCard({ analysis, onDelete, onUpdate }: Ana
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
                   <div className="bg-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{brandProfile.brand_identity?.competitive_landscape?.length || 0}</div>
-                    <div className="text-sm text-blue-100">Competitors Identified</div>
+                    <div className="text-xl sm:text-2xl font-bold">{brandProfile.brand_identity?.competitive_landscape?.length || 0}</div>
+                    <div className="text-xs sm:text-sm text-blue-100">Competitors Identified</div>
                   </div>
                   <div className="bg-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{brandProfile.brand_voice_guide?.words_to_use?.length || 0}</div>
-                    <div className="text-sm text-blue-100">Brand Words</div>
+                    <div className="text-xl sm:text-2xl font-bold">{brandProfile.brand_voice_guide?.words_to_use?.length || 0}</div>
+                    <div className="text-xs sm:text-sm text-blue-100">Brand Words</div>
                   </div>
                   <div className="bg-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">4</div>
-                    <div className="text-sm text-blue-100">Content Pillars</div>
+                    <div className="text-xl sm:text-2xl font-bold">4</div>
+                    <div className="text-xs sm:text-sm text-blue-100">Content Pillars</div>
                   </div>
                   <div className="bg-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">100%</div>
-                    <div className="text-sm text-blue-100">Complete Analysis</div>
+                    <div className="text-xl sm:text-2xl font-bold">100%</div>
+                    <div className="text-xs sm:text-sm text-blue-100">Complete Analysis</div>
                   </div>
                 </div>
               </div>
