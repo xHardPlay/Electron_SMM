@@ -30,7 +30,7 @@ export const charactersApi = {
     brandAnalysis?: string
   ): Promise<{ success: boolean; error?: string; characters_generated?: number }> {
     try {
-      const response = await fetch(`${API_BASE}/characters`, {
+      const response = await fetch(`${API_BASE}/character-generations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export const charactersApi = {
         },
         body: JSON.stringify({
           workspace_id: workspaceId,
-          brand_analysis: brandAnalysis,
+          analysis_id: brandAnalysis ? parseInt(brandAnalysis) : undefined,
         }),
       })
 
@@ -46,15 +46,36 @@ export const charactersApi = {
         const data = await response.json()
         return {
           success: true,
-          characters_generated: data.characters_generated
+          characters_generated: 0 // Will be shown via generation status
         }
       } else {
         const data = await response.json()
-        return { success: false, error: data.error || 'Failed to generate characters' }
+        return { success: false, error: data.error || 'Failed to start character generation' }
       }
     } catch (error) {
-      console.error('Error generating characters:', error)
+      console.error('Error starting character generation:', error)
       return { success: false, error: 'Network error' }
+    }
+  },
+
+  async fetchCharacterGenerations(token: string, workspaceId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${API_BASE}/character-generations?workspace_id=${workspaceId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data.generations || []
+      } else {
+        console.error('Failed to fetch character generations')
+        return []
+      }
+    } catch (error) {
+      console.error('Error fetching character generations:', error)
+      throw error
     }
   },
 

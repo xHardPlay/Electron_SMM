@@ -56,21 +56,16 @@ async function testAdGeneration() {
       characters.characters[1].id
     ], 'linkedin_post', adTopic, 2);
 
-    if (generateResult.message !== 'Ad generation started. Ads will be available shortly.') {
-      throw new Error('Ad generation did not start properly');
+    if (generateResult.message !== 'Ad generation completed successfully.') {
+      throw new Error('Ad generation did not complete properly');
     }
 
     results.pass('Ad generation initiation');
 
-    // Wait for ads to be generated
-    console.log('Waiting for ads to be generated...');
-    await waitForCompletion(async () => {
-      const ads = await getAds(token, workspaceId);
-      console.log('Found ads:', ads.ads?.length || 0);
-      return ads.ads && ads.ads.length >= 2;
-    }, 20, 3000); // 20 attempts, 3 second delay = 60 seconds total
-
+    // Since ad generation is now synchronous, ads should be immediately available
+    console.log('Checking for ads immediately after generation...');
     const ads = await getAds(token, workspaceId);
+    console.log('Found ads:', ads.ads?.length || 0);
 
     if (!ads.ads || ads.ads.length < 2) {
       throw new Error('Expected at least 2 ads to be generated');

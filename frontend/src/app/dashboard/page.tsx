@@ -3,9 +3,12 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AdForm from '../../components/AdForm'
+import AdGenerationCard from '../../components/AdGenerationCard'
 import AnalysisForm from '../../components/AnalysisForm'
 import AnalysisResultCard from '../../components/AnalysisResultCard'
+import CharacterDisplay from '../../components/CharacterDisplay'
 import CharacterForm from '../../components/CharacterForm'
+import CharacterGenerationCard from '../../components/CharacterGenerationCard'
 import WorkspaceForm from '../../components/WorkspaceForm'
 import WorkspaceSidebar from '../../components/WorkspaceSidebar'
 import { useAdGenerations } from '../../hooks/useAdGenerations'
@@ -51,9 +54,11 @@ export default function Dashboard() {
 
   const {
     characters,
+    characterGenerations,
     message: characterMessage,
     loading: characterLoading,
     fetchCharacters,
+    fetchCharacterGenerations,
     generateCharacters,
     updateCharacterStatus,
     clearMessage: clearCharacterMessage,
@@ -83,10 +88,12 @@ export default function Dashboard() {
     if (selectedWorkspace && token) {
       fetchAnalyses(selectedWorkspace)
       fetchCharacters(selectedWorkspace)
+      fetchCharacterGenerations(selectedWorkspace)
       fetchAds(selectedWorkspace)
       fetchCharacterImages(selectedWorkspace)
+      fetchGenerations(selectedWorkspace)
     }
-  }, [selectedWorkspace, token, fetchAnalyses, fetchCharacters, fetchAds, fetchCharacterImages])
+  }, [selectedWorkspace, token, fetchAnalyses, fetchCharacters, fetchCharacterGenerations, fetchAds, fetchCharacterImages, fetchGenerations])
 
   // Event handlers
   const handleWorkspaceSelect = (workspaceId: string) => {
@@ -237,6 +244,8 @@ export default function Dashboard() {
                       onWorkspaceSelect={handleWorkspaceSelect}
                       onGenerateCharacters={(analysisId) => {
                         generateCharacters(analysisId)
+                        // Switch to characters tab to show results
+                        setActiveResultsTab('characters')
                       }}
                       onUploadImage={(image) => {
                         // TODO: Implement image upload
@@ -347,108 +356,94 @@ export default function Dashboard() {
 
                 {activeResultsTab === 'characters' && (
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">Brand Voice Characters</h3>
-                    {characters.length === 0 ? (
-                      <p className="text-gray-600">No characters yet. Generate characters above!</p>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {characters.map((character) => (
-                          <div key={character.id} className="border border-gray-200 rounded-md p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="text-lg font-medium">{character.name}</h4>
-                              <span className={`px-2 py-1 rounded text-sm ${
-                                character.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                character.status === 'discarded' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {character.status}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">{character.description}</p>
-                            {character.personality && (
-                              <div className="mb-3">
-                                <p className="text-xs text-gray-500 mb-1">Personality:</p>
-                                <p className="text-sm bg-gray-50 p-2 rounded">{character.personality}</p>
-                              </div>
-                            )}
-                            <div className="flex gap-2">
-                              {character.status === 'pending' && (
-                                <>
-                                  <button
-                                    onClick={() => handleCharacterAction(character.id.toString(), 'approved')}
-                                    className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                                  >
-                                    Approve
-                                  </button>
-                                  <button
-                                    onClick={() => handleCharacterAction(character.id.toString(), 'discarded')}
-                                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                                  >
-                                    Discard
-                                  </button>
-                                </>
-                              )}
-                              {character.status === 'approved' && (
-                                <span className="text-green-600 text-sm">✓ Approved for use</span>
-                              )}
-                              {character.status === 'discarded' && (
-                                <span className="text-red-600 text-sm">✗ Discarded</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                    <h3 className="text-xl font-semibold mb-4">Characters</h3>
+                    {/* Show character generations first */}
+                    {characterGenerations.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-medium mb-4">Character Generations</h4>
+                        <div className="space-y-4">
+                          {characterGenerations.map((generation) => (
+                            <CharacterGenerationCard
+                              key={generation.id}
+                              generation={generation}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
+                    {/* Then show character results */}
+                    <CharacterDisplay
+                      characters={characters}
+                      handleCharacterAction={handleCharacterAction}
+                    />
                   </div>
                 )}
 
                 {activeResultsTab === 'ads' && (
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">Generated Ads</h3>
-                    {ads.length === 0 ? (
-                      <p className="text-gray-600">No ads generated yet. Create ads above!</p>
-                    ) : (
-                      <div className="space-y-4">
-                        {ads.map((ad) => (
-                          <div key={ad.id} className="border border-gray-200 rounded-md p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <div>
-                                <h4 className="text-lg font-medium">{ad.topic}</h4>
-                                <p className="text-sm text-gray-600">{ad.character_name} • {ad.ad_type.replace('_', ' ')}</p>
-                              </div>
-                              <div className="flex gap-2">
-                                <span className="px-2 py-1 rounded text-sm bg-orange-100 text-orange-800">
-                                  {ad.ad_type.replace('_', ' ')}
-                                </span>
-                                {ad.content_category && (
-                                  <span className={`px-2 py-1 rounded text-sm ${
-                                    ad.content_category === 'education' ? 'bg-blue-100 text-blue-800' :
-                                    ad.content_category === 'story' ? 'bg-green-100 text-green-800' :
-                                    ad.content_category === 'proof' ? 'bg-purple-100 text-purple-800' :
-                                    ad.content_category === 'promotion' ? 'bg-red-100 text-red-800' :
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {ad.content_category}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-2">
-                              Created: {new Date(ad.created_at).toLocaleDateString()}
-                            </p>
-                            <div className="bg-gray-50 p-3 rounded mb-3">
-                              <p className="text-sm whitespace-pre-wrap">{ad.content}</p>
-                            </div>
-                            {ad.image_prompt && (
-                              <div className="bg-blue-50 p-3 rounded">
-                                <p className="text-xs text-blue-600 font-medium mb-1">Image Prompt:</p>
-                                <p className="text-sm text-blue-800">{ad.image_prompt}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                    <h3 className="text-xl font-semibold mb-4">Ads</h3>
+                    {/* Show ad generations first */}
+                    {generations.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-medium mb-4">Ad Generations</h4>
+                        <div className="space-y-4">
+                          {generations.map((generation) => (
+                            <AdGenerationCard
+                              key={generation.id}
+                              generation={generation}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
+                    {/* Then show ad results */}
+                    <div className="mt-6">
+                      <h4 className="text-lg font-medium mb-4">Generated Ads</h4>
+                      {ads.length === 0 ? (
+                        <p className="text-gray-600">No ads generated yet. Create ads above!</p>
+                      ) : (
+                        <div className="space-y-4">
+                          {ads.map((ad) => (
+                            <div key={ad.id} className="border border-gray-200 rounded-md p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h4 className="text-lg font-medium">{ad.topic}</h4>
+                                  <p className="text-sm text-gray-600">{ad.character_name} • {ad.ad_type.replace('_', ' ')}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <span className="px-2 py-1 rounded text-sm bg-orange-100 text-orange-800">
+                                    {ad.ad_type.replace('_', ' ')}
+                                  </span>
+                                  {ad.content_category && (
+                                    <span className={`px-2 py-1 rounded text-sm ${
+                                      ad.content_category === 'education' ? 'bg-blue-100 text-blue-800' :
+                                      ad.content_category === 'story' ? 'bg-green-100 text-green-800' :
+                                      ad.content_category === 'proof' ? 'bg-purple-100 text-purple-800' :
+                                      ad.content_category === 'promotion' ? 'bg-red-100 text-red-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {ad.content_category}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2">
+                                Created: {new Date(ad.created_at).toLocaleDateString()}
+                              </p>
+                              <div className="bg-gray-50 p-3 rounded mb-3">
+                                <p className="text-sm whitespace-pre-wrap">{ad.content}</p>
+                              </div>
+                              {ad.image_prompt && (
+                                <div className="bg-blue-50 p-3 rounded">
+                                  <p className="text-xs text-blue-600 font-medium mb-1">Image Prompt:</p>
+                                  <p className="text-sm text-blue-800">{ad.image_prompt}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 

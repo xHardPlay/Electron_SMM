@@ -21,7 +21,7 @@ export interface Character {
   name: string
   description: string
   personality?: string
-  status: 'pending' | 'approved' | 'discarded'
+  status: 'processing' | 'generating' | 'pending' | 'approved' | 'discarded' | 'completed' | 'failed'
   workspace_id: number
   created_at: string
 }
@@ -32,8 +32,9 @@ export interface Ad {
   character_name: string
   ad_type: string
   content: string
-  content_category?: string
+  content_category?: 'education' | 'story' | 'proof' | 'promotion'
   image_prompt?: string
+  status: string
   created_at: string
 }
 

@@ -18,6 +18,8 @@ const { testCharacterImageManagement } = require('./test_character_images');
 const { testAnalysisDeletion } = require('./test_analysis_deletion');
 const { testFileAnalysis } = require('./test_file_analysis');
 const { testHealthEndpoint } = require('./test_health');
+const { testCharacterGenerations } = require('./test_character_generations');
+const { testAdGenerationsStatus } = require('./test_ad_generations_status');
 
 /**
  * Test suite configuration
@@ -82,6 +84,18 @@ const TEST_SUITES = [
     description: 'Basic health check and CORS functionality',
     testFunction: testHealthEndpoint,
     timeout: 10000, // 10 seconds
+  },
+  {
+    name: 'Character Generations Tests',
+    description: 'Asynchronous character generation with status phases',
+    testFunction: testCharacterGenerations,
+    timeout: 180000, // 3 minutes for AI processing
+  },
+  {
+    name: 'Ad Generations Status Tests',
+    description: 'Asynchronous ad generation with status phases',
+    testFunction: testAdGenerationsStatus,
+    timeout: 300000, // 5 minutes for AI processing
   },
 ];
 

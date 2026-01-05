@@ -50,6 +50,8 @@ class TestResults {
  */
 async function makeRequest(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
+  console.log(`[HTTP] --> ${options.method || 'GET'} ${url}`);
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -60,16 +62,24 @@ async function makeRequest(endpoint, options = {}) {
 
   if (options.body && typeof options.body === 'object') {
     config.body = JSON.stringify(options.body);
+    console.log(`[HTTP] --> Request body: ${JSON.stringify(options.body)}`);
   }
+
+  console.log(`[HTTP] --> Headers:`, JSON.stringify(config.headers));
 
   const response = await fetch(url, config);
 
+  console.log(`[HTTP] <-- ${response.status} ${response.statusText}`);
+
   if (!response.ok) {
     const error = await response.text();
+    console.log(`[HTTP] <-- Error response body: ${error}`);
     throw new Error(`${response.status}: ${error}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log(`[HTTP] <-- Response body: ${JSON.stringify(result)}`);
+  return result;
 }
 
 /**
@@ -171,11 +181,13 @@ async function updateCharacter(token, characterId, status) {
  * Ad utilities
  */
 async function generateAds(token, workspaceId, characterIds, adType, topic, quantity) {
-  return makeRequest('/api/ads', {
+  const response = await makeRequest('/api/ads', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}` },
     body: { workspace_id: workspaceId, character_ids: characterIds, ad_type: adType, topic, quantity },
   });
+  console.log(`[TestUtils] Generate ads response:`, response);
+  return response;
 }
 
 async function getAds(token, workspaceId) {

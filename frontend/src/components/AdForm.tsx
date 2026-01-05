@@ -108,10 +108,10 @@ export default function AdForm({
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Select Characters (Approved only)
+            Select Characters (Approved or Completed)
           </label>
           <div className="space-y-2 max-h-32 overflow-y-auto">
-            {characters.filter(c => c.status === 'approved').map((character) => (
+            {characters.filter(c => c.status === 'approved' || c.status === 'completed').map((character) => (
               <label key={character.id} className="flex items-center">
                 <input
                   type="checkbox"
@@ -123,8 +123,8 @@ export default function AdForm({
               </label>
             ))}
           </div>
-          {characters.filter(c => c.status === 'approved').length === 0 && (
-            <p className="text-sm text-red-600">No approved characters available. Please approve some characters first.</p>
+          {characters.filter(c => c.status === 'approved' || c.status === 'completed').length === 0 && (
+            <p className="text-sm text-red-600">No approved or completed characters available. Please generate and approve some characters first.</p>
           )}
         </div>
 

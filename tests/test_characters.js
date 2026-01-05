@@ -58,7 +58,7 @@ async function testCharacterManagement() {
 
     // Test character status validation
     const firstCharacter = characters.characters[0];
-    if (!['pending', 'approved', 'discarded'].includes(firstCharacter.status)) {
+    if (!['pending', 'approved', 'discarded', 'completed'].includes(firstCharacter.status)) {
       throw new Error('Character status is invalid');
     }
 
